@@ -1,0 +1,10 @@
+{
+  "name": "თბილისის ასისტენტი",
+  "short_name": "ასისტენტი",
+  "description": "Accessible voice assistant for concerts and buses in Tbilisi",
+  "start_url": "/app/",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#0f0f1a",
+  "orientation": "portrait"
+}
