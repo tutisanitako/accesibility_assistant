@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>თბილისის ასისტენტი</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1a1a2e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="თბილისის ასისტენტი" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:        #0f0f1a;
+      --surface:   #1a1a2e;
+      --surface2:  #222240;
+      --border:    #2e2e50;
+      --accent:    #f4a942;
+      --accent2:   #5b8dee;
+      --green:     #4caf80;
+      --red:       #e05c6a;
+      --purple:    #a78bfa;
+      --text:      #eeeef5;
+      --text2:     #a0a0c0;
+      --text3:     #6060a0;
+      --radius:    16px;
+      --radius-sm: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans Georgian', sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0 100px;
+      overflow-x: hidden;
+    }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      gap: 10px;
+    }
+    .header-title { font-size: 17px; font-weight: 700; color: var(--accent); }
+    .header-sub   { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+    .header-btns { display: flex; gap: 8px; flex-shrink: 0; }
+
+    .icon-btn {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text2);
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'Noto Sans Georgian', sans-serif;
+      white-space: nowrap;
+    }
+    .icon-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+    .icon-btn.active { border-color: var(--green); color: var(--green); }
+
+    #install-btn { display: none; }
+    #install-btn.visible { display: block; }
+
+    /* ── Main ── */
+    .main {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      padding: 0 16px;
+    }
+
+    /* ── Offline banner ── */
+    #offline-banner {
+      display: none;
+      background: rgba(224,92,106,0.15);
+      border: 1px solid var(--red);
+      border-radius: var(--radius-sm);
+      padding: 12px 18px;
+      font-size: 15px;
+      color: var(--red);
+      text-align: center;
+      margin-top: 16px;
+    }
+    #offline-banner.visible { display: block; }
+
+    /* ── Home settings panel ── */
+    #home-panel {
+      display: none;
+      background: var(--surface);
+      border: 1.5px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-top: 14px;
+      flex-direction: column;
+      gap: 12px;
+    }
+    #home-panel.visible { display: flex; }
+    #home-panel label { font-size: 14px; color: var(--text2); }
+    #home-panel input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'Noto Sans Georgian', sans-serif;
+      font-size: 15px;
+      outline: none;
+    }
+    #home-panel input:focus { border-color: var(--accent); }
+    .home-panel-row { display: flex; gap: 8px; }
+    .home-save-btn {
+      flex: 1;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 11px;
+      color: #1a1200;
+      font-family: 'Noto Sans Georgian', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .home-gps-btn {
+      flex: 1;
+      background: transparent;
+      border: 1.5px solid var(--accent2);
+      border-radius: 8px;
+      padding: 11px;
+      color: var(--accent2);
+      font-family: 'Noto Sans Georgian', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #home-status { font-size: 13px; color: var(--green); }
+
+    /* ── Mic section ── */
+    .mic-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 0 20px;
+      gap: 16px;
+    }
+    .mic-hint { font-size: 15px; color: var(--text2); text-align: center; }
+
+    #mic-btn {
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      background: rgba(244,169,66,0.08);
+      cursor: pointer;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 5px;
+      transition: all 0.2s;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #mic-btn:active { transform: scale(0.96); }
+    #mic-btn svg { width: 40px; height: 40px; fill: var(--accent); }
+    #mic-btn .btn-label { font-size: 12px; color: var(--accent); font-weight: 600; }
+
+    #mic-btn.recording { border-color: var(--red); background: rgba(224,92,106,0.1); animation: pulse 1.4s ease-in-out infinite; }
+    #mic-btn.recording svg { fill: var(--red); }
+    #mic-btn.recording .btn-label { color: var(--red); }
+
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(224,92,106,0.35); }
+      50%      { box-shadow: 0 0 0 20px rgba(224,92,106,0); }
+    }
+
+    /* Quick action buttons */
+    .quick-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+    }
+    .qa-btn {
+      font-family: 'Noto Sans Georgian', sans-serif;
+      font-size: 13px;
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text2);
+      cursor: pointer;
+    }
+    .qa-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    /* ── Status bar ── */
+    #status-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 9px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text2);
+      min-width: 170px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    #status-bar.active { color: var(--accent2); border-color: var(--accent2); background: rgba(91,141,238,0.08); }
+    #status-bar.error  { color: var(--red);    border-color: var(--red);    background: rgba(224,92,106,0.08); }
+    #status-bar.ok     { color: var(--green);  border-color: var(--green);  background: rgba(76,175,128,0.08); }
+
+    /* ── Text input ── */
+    .text-row { width:100%; display:flex; gap:8px; }
+    #text-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: 'Noto Sans Georgian', sans-serif;
+      font-size: 15px;
+      outline: none;
+    }
+    #text-input:focus { border-color: var(--accent2); }
+    #text-send {
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      padding: 12px 18px;
+      color: #1a1200;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-top: 12px;
+    }
+    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .card-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .card-icon.orange { background: rgba(244,169,66,0.15); }
+    .card-icon.blue   { background: rgba(91,141,238,0.15); }
+    .card-icon svg { width: 18px; height: 18px; }
+    .card-icon.orange svg { fill: var(--accent); }
+    .card-icon.blue   svg { fill: var(--accent2); }
+    .card-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; }
+    .card-body { font-size: 16px; line-height: 1.7; color: var(--text); }
+    .card-body.empty { color: var(--text3); font-size: 14px; }
+
+    audio { width:100%; margin-top:12px; height:40px; border-radius:8px; accent-color:var(--accent); }
+
+    /* ── Bus offer ── */
+    #bus-offer {
+      display: none;
+      background: var(--surface2);
+      border: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-top: 12px;
+      flex-direction: column;
+      gap: 12px;
+    }
+    #bus-offer.visible { display: flex; }
+    .offer-icon  { font-size: 28px; text-align: center; }
+    .offer-title { font-size: 16px; font-weight: 700; color: var(--text); text-align: center; }
+    .offer-subtitle { font-size: 13px; color: var(--text2); text-align: center; }
+    .offer-btns { display: flex; gap: 8px; }
+    .offer-btn { flex:1; font-family:'Noto Sans Georgian',sans-serif; font-size:14px; font-weight:700; padding:12px 8px; border-radius:var(--radius-sm); border:none; cursor:pointer; }
+    .offer-btn.primary   { background:var(--accent); color:#1a1200; }
+    .offer-btn.secondary { background:var(--surface); color:var(--text2); border:1px solid var(--border); }
+
+    /* ── Results section ── */
+    #results { display: flex; flex-direction: column; }
+
+    /* Concert card */
+    .concert-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); margin-top:12px; overflow:hidden; animation:slideUp 0.3s ease; }
+    .concert-card-top { padding:14px 16px 12px; border-bottom:1px solid var(--border); }
+    .concert-name { font-size:16px; font-weight:700; color:var(--text); line-height:1.4; margin-bottom:3px; }
+    .concert-venue-line { font-size:12px; color:var(--text3); }
+    .concert-card-meta { display:grid; grid-template-columns:1fr 1fr; }
+    .meta-cell { padding:10px 16px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+    .meta-cell:nth-child(even) { border-right:none; }
+    .meta-cell:nth-last-child(-n+2) { border-bottom:none; }
+    .meta-cell-label { font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px; }
+    .meta-cell-value { font-size:13px; color:var(--text); font-weight:500; }
+    .concert-card-bottom { padding:10px 16px; display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+    .price-badge { font-size:14px; font-weight:700; padding:5px 12px; border-radius:7px; }
+    .price-paid { background:rgba(244,169,66,0.12); color:var(--accent); }
+    .price-free { background:rgba(76,175,128,0.12); color:var(--green); }
+    .price-sold { background:rgba(224,92,106,0.12); color:var(--red); }
+    .ticket-btn { font-family:'Noto Sans Georgian',sans-serif; font-size:13px; font-weight:700; color:var(--accent); background:transparent; border:1.5px solid var(--accent); padding:6px 14px; border-radius:7px; text-decoration:none; }
+    .desc-btn { font-family:'Noto Sans Georgian',sans-serif; font-size:13px; color:var(--purple); background:transparent; border:1.5px solid var(--purple); padding:6px 12px; border-radius:7px; cursor:pointer; }
+
+    /* Category badge */
+    .cat-badge { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; margin-left:6px; vertical-align:middle; }
+    .cat-concert { background:rgba(244,169,66,0.15); color:var(--accent); }
+    .cat-theatre { background:rgba(167,139,250,0.15); color:var(--purple); }
+    .cat-opera   { background:rgba(91,141,238,0.15);  color:var(--accent2); }
+
+    /* Bus card */
+    .bus-card { background:var(--surface); border:1px solid var(--border); border-left:4px solid var(--accent2); border-radius:var(--radius); margin-top:12px; overflow:hidden; animation:slideUp 0.3s ease; }
+    .bus-card-header { padding:12px 16px 8px; display:flex; align-items:center; justify-content:space-between; }
+    .bus-stop-name { font-size:14px; font-weight:700; color:var(--text); }
+    .bus-dist-badge { font-size:11px; color:var(--accent2); background:rgba(91,141,238,0.1); padding:3px 8px; border-radius:20px; }
+    .bus-times-section { padding:8px 16px 14px; border-top:1px solid var(--border); }
+    .bus-times-label { font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px; }
+    .times-grid { display:flex; flex-wrap:wrap; gap:6px; }
+    .time-chip { background:rgba(91,141,238,0.12); color:var(--accent2); font-size:15px; font-weight:700; padding:7px 12px; border-radius:9px; border:1px solid rgba(91,141,238,0.2); }
+    .time-chip.soon { background:rgba(76,175,128,0.15); color:var(--green); border-color:rgba(76,175,128,0.25); }
+    .no-more-buses { font-size:13px; color:var(--text3); font-style:italic; }
+
+    /* Journey card */
+    .journey-card { background:var(--surface); border:1px solid var(--border); border-left:4px solid var(--green); border-radius:var(--radius); margin-top:12px; padding:14px 16px; animation:slideUp 0.3s ease; }
+    .journey-route-num { font-size:20px; font-weight:700; color:var(--green); margin-bottom:3px; }
+    .journey-route-label { font-size:12px; color:var(--text3); margin-bottom:8px; }
+
+    /* Section header */
+    .section-hdr { font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.1em; margin-top:18px; margin-bottom:2px; padding:0 2px; }
+
+    /* Description modal */
+    #desc-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    #desc-modal.visible { display: flex; }
+    .desc-sheet {
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 560px;
+      padding: 24px 20px 40px;
+      max-height: 70dvh;
+      overflow-y: auto;
+    }
+    .desc-sheet-name { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .desc-sheet-venue { font-size: 13px; color: var(--text3); margin-bottom: 16px; }
+    .desc-sheet-body { font-size: 15px; line-height: 1.8; color: var(--text2); }
+    .desc-sheet-close { float: right; background: none; border: none; color: var(--text3); font-size: 22px; cursor: pointer; line-height: 1; }
+
+    @keyframes slideUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-title">🎵 თბილისის ასისტენტი</div>
+    <div class="header-sub">კონცერტები · თეატრი · ოპერა · ავტობუსები</div>
+  </div>
+  <div class="header-btns">
+    <button class="icon-btn" id="home-toggle-btn" title="სახლის პარამეტრები">🏠 სახლი</button>
+    <button class="icon-btn" id="gps-btn" title="ახლომდებარე გაჩერებები">📍 GPS</button>
+    <button class="icon-btn visible" id="install-btn">+ დაყენება</button>
+  </div>
+</header>
+
+<main class="main" role="main">
+
+  <div id="offline-banner" role="alert">⚠️ ინტერნეტი გათიშულია</div>
+
+  <!-- Home settings panel -->
+  <div id="home-panel" aria-label="სახლის მისამართი">
+    <label>სახლის მისამართი (ან სახელი):</label>
+    <input id="home-address-input" type="text" placeholder="მაგ: ვარაზის ხეობის 14, თბილისი" />
+    <div class="home-panel-row">
+      <button class="home-save-btn" id="home-save-btn">💾 შენახვა</button>
+      <button class="home-gps-btn" id="home-gps-btn">📍 ახლანდელი ადგილი = სახლი</button>
+    </div>
+    <div id="home-status"></div>
+  </div>
+
+  <section class="mic-section">
+    <p class="mic-hint">დააჭირეთ ღილაკს და დასვით კითხვა</p>
+
+    <button id="mic-btn" aria-label="ჩაწერის დაწყება" aria-pressed="false">
+      <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 16.93A8.001 8.001 0 0 1 4 11H2a10 10 0 0 0 9 9.95V23h2v-2.05A10 10 0 0 0 22 11h-2a8.001 8.001 0 0 1-7 6.93z"/></svg>
+      <span class="btn-label">ლაპარაკი</span>
+    </button>
+
+    <div id="status-bar" aria-live="polite" role="status">მოლოდინში...</div>
+
+    <div class="quick-actions">
+      <button class="qa-btn" onclick="processText('რა კონცერტებია ხვალ?')">🎵 კონცერტები</button>
+      <button class="qa-btn" onclick="processText('რა სპექტაკლია ამ კვირაში?')">🎭 თეატრი</button>
+      <button class="qa-btn" onclick="processText('ოპერა ამ კვირაში')">🎤 ოპერა</button>
+      <button class="qa-btn" onclick="triggerHomeRoute()">🏠 სახლში</button>
+    </div>
+
+    <div class="text-row">
+      <input id="text-input" type="text" placeholder="ან ჩაწერეთ კითხვა..." />
+      <button id="text-send">→</button>
+    </div>
+  </section>
+
+  <!-- You said -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon orange">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+      </div>
+      <span class="card-label">თქვენი კითხვა:</span>
+    </div>
+    <p id="transcript" class="card-body empty" aria-live="polite">აქ გამოჩნდება თქვენი კითხვა...</p>
+  </div>
+
+  <!-- Response -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon blue">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      </div>
+      <span class="card-label">ასისტენტის პასუხი</span>
+    </div>
+    <p id="response-text" class="card-body empty" aria-live="assertive">აქ გამოჩნდება პასუხი...</p>
+    <audio id="response-audio" controls style="display:none"></audio>
+  </div>
+
+  <!-- Bus offer -->
+  <div id="bus-offer" aria-live="polite">
+    <div class="offer-icon">🚌</div>
+    <div class="offer-title" id="bus-offer-text"></div>
+    <div class="offer-subtitle">ვიცით რომელი ავტობუსი მიდის</div>
+    <div class="offer-btns">
+      <button class="offer-btn primary" id="bus-offer-yes">✓ დიახ</button>
+      <button class="offer-btn secondary" id="bus-offer-no">✕ არა</button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <section id="results" aria-label="შედეგები" aria-live="polite"></section>
+
+</main>
+
+<!-- Description modal -->
+<div id="desc-modal">
+  <div class="desc-sheet">
+    <button class="desc-sheet-close" id="desc-close">✕</button>
+    <div class="desc-sheet-name" id="desc-name"></div>
+    <div class="desc-sheet-venue" id="desc-venue"></div>
+    <div class="desc-sheet-body" id="desc-body">იტვირთება...</div>
+  </div>
+</div>
+
+<script>
+const API = 'https://nerissa-nonvolatilized-drew.ngrok-free.dev';
+let _lastGPS = null;
+if (navigator.geolocation) {
+  navigator.geolocation.watchPosition(
+    pos => { _lastGPS = { lat: pos.coords.latitude, lng: pos.coords.longitude }; },
+    () => {},
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+  );
+}
+
+function apiFetch(path, options = {}) {
+  return fetch(API + path, {
+    ...options,
+    headers: { 'ngrok-skip-browser-warning': '1', ...(options.headers || {}) },
+  });
+}
+
+// ── PWA ───────────────────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+let deferredPrompt;
+const installBtn = document.getElementById('install-btn');
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; installBtn.classList.add('visible'); });
+installBtn.addEventListener('click', async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; installBtn.classList.remove('visible'); });
+
+// ── Offline ───────────────────────────────────────────────────────────────────
+const offlineBanner = document.getElementById('offline-banner');
+function checkOnline() { offlineBanner.classList.toggle('visible', !navigator.onLine); }
+window.addEventListener('online', checkOnline); window.addEventListener('offline', checkOnline); checkOnline();
+
+// ── Home settings ─────────────────────────────────────────────────────────────
+const homeToggleBtn  = document.getElementById('home-toggle-btn');
+const homePanel      = document.getElementById('home-panel');
+const homeAddrInput  = document.getElementById('home-address-input');
+const homeSaveBtn    = document.getElementById('home-save-btn');
+const homeGpsBtn     = document.getElementById('home-gps-btn');
+const homeStatus     = document.getElementById('home-status');
+
+// Load saved home from localStorage on startup
+let savedHome = null; // { address, lat, lng } or null
+try { savedHome = JSON.parse(localStorage.getItem('tbilisi_home') || 'null'); } catch {}
+if (savedHome) {
+  homeAddrInput.value = savedHome.address || '';
+  homeStatus.textContent = '✓ სახლი შენახულია';
+  homeToggleBtn.classList.add('active');
+}
+
+homeToggleBtn.addEventListener('click', () => homePanel.classList.toggle('visible'));
+
+homeSaveBtn.addEventListener('click', async () => {
+  const addr = homeAddrInput.value.trim();
+  if (!addr) return;
+  homeStatus.textContent = 'გეოკოდირება...';
+  // Geocode via Nominatim
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(addr + ', Tbilisi')}&format=json&limit=1&countrycodes=ge`;
+    const res = await fetch(url, { headers: { 'User-Agent': 'TbilisiAssistant/1.0' } });
+    const data = await res.json();
+    if (data && data.length) {
+      savedHome = { address: addr, lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      localStorage.setItem('tbilisi_home', JSON.stringify(savedHome));
+      homeStatus.textContent = `✓ შენახულია: ${data[0].display_name.split(',')[0]}`;
+      homeToggleBtn.classList.add('active');
+    } else {
+      homeStatus.textContent = '⚠️ მისამართი ვერ მოიძებნა';
+    }
+  } catch {
+    homeStatus.textContent = '⚠️ კავშირის შეცდომა';
+  }
+});
+
+homeGpsBtn.addEventListener('click', () => {
+  if (!navigator.geolocation) { homeStatus.textContent = '⚠️ GPS მიუწვდომელია'; return; }
+  homeStatus.textContent = 'GPS-ის ლოდინი...';
+  navigator.geolocation.getCurrentPosition(pos => {
+    savedHome = { address: 'ჩემი ადგილმდებარეობა (GPS)', lat: pos.coords.latitude, lng: pos.coords.longitude };
+    localStorage.setItem('tbilisi_home', JSON.stringify(savedHome));
+    homeAddrInput.value = savedHome.address;
+    homeStatus.textContent = `✓ შენახულია (${savedHome.lat.toFixed(4)}, ${savedHome.lng.toFixed(4)})`;
+    homeToggleBtn.classList.add('active');
+  }, () => { homeStatus.textContent = '⚠️ GPS შეცდომა'; });
+});
+
+// ── GPS nearest stop button ───────────────────────────────────────────────────
+document.getElementById('gps-btn').addEventListener('click', async () => {
+  if (!navigator.geolocation) { setStatus('GPS მიუწვდომელია', 'error'); return; }
+  setStatus('GPS-ის ლოდინი...', 'active');
+
+  navigator.geolocation.getCurrentPosition(async pos => {
+    setStatus('ახლომდებარე ავტობუსების ძიება...', 'active');
+    try {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      const res  = await apiFetch(`/nearest-stop?lat=${lat}&lng=${lng}&limit=8`);
+      const data = await res.json();
+
+      if (data.needs_geocoding) {
+        const msg = 'GPS ფუნქცია ჯერ არ არის კონფიგურირებული.';
+        setResponse(msg); setStatus('⚠️ კონფიგურაცია საჭიროა', 'error'); return;
+      }
+
+      const stops = Array.isArray(data) ? data : (data.stops || []);
+      setTranscript('📍 ახლომდებარე ავტობუსის გაჩერებები');
+
+      if (stops.length === 0) {
+        const msg = 'ახლომდებარე გაჩერება ვერ მოიძებნა.';
+        setResponse(msg); await speak(msg);
+        setStatus('მზადაა ✓', 'ok'); return;
+      }
+
+      // Build spoken summary with real departure times
+      const parts = stops.slice(0, 4).map(s => {
+        const name    = (s.name || s.stop_name || '').replace(/\s*\[\d+\]/g, '').trim();
+        const route   = s.route_number || '';
+        const depTime = s.departure_time || '';
+        const walk    = s.walk_duration || s.walk_minutes ? `${s.walk_minutes || Math.round((s.distance_m||0)/80)} წუთი` : '';
+
+        if (depTime && route) {
+          return `${route}-ე ავტობუსი ${depTime}-ზე${walk ? ', ' + walk + ' სიარული' : ''}`;
+        } else if (route) {
+          return `${route}-ე მარშრუტი${walk ? ', ' + walk + ' სიარული' : ''}`;
+        }
+        return walk ? `${name}, ${walk} სიარული` : name;
+      });
+
+      const msg = `ახლოს ${stops.length} ავტობუსი ვიპოვე. ${parts.join('; ')}.`;
+      setResponse(msg);
+      renderNearestStops(stops);
+      await speak(msg);
+      setStatus('მზადაა ✓', 'ok');
+
+    } catch(e) {
+      setStatus('შეცდომა', 'error');
+      console.error(e);
+    }
+  }, () => setStatus('GPS შეცდომა', 'error'));
+});
+
+
+// ── Home route ────────────────────────────────────────────────────────────────
+async function triggerHomeRoute() {
+  if (!savedHome) {
+    setStatus('სახლი არ არის შენახული', 'error');
+    homePanel.classList.add('visible');
+    return;
+  }
+  setStatus('სახლთან მიმავალ ავტობუსებს ვეძებ...', 'active');
+  setTranscript('🏠 სახლში მიყვანე');
+  hideBusOffer(); resultsEl.innerHTML = '';
+
+  const doHomeRoute = async (currentLat, currentLng) => {
+    try {
+      const res = await apiFetch('/home-route', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          current_lat: currentLat, current_lng: currentLng,
+          home_lat: savedHome.lat,  home_lng: savedHome.lng,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.needs_geocoding) {
+        const msg = 'GPS ფუნქცია ჯერ კონფიგურირებული არ არის.';
+        setResponse(msg); await speak(msg);
+        setStatus('⚠️ კონფიგურაცია საჭიროა', 'error'); return;
+      }
+
+      let msg;
+      // Google Maps directions available
+      if (data.directions && data.directions.steps) {
+        const total = data.directions.total_duration || '';
+        const dep   = data.directions.departure_time || '';
+        const steps = data.directions.steps.filter(s => s.type === 'transit');
+        if (steps.length > 0) {
+          const first = steps[0];
+          msg = `სახლში მისასვლელად ${first.line_name}-ე ავტობუსი ${first.departure_time}-ზე. სულ ${total}.`;
+        } else {
+          msg = `სახლში სასვლელი მარშრუტი: ${total}.`;
+        }
+        renderDirections(data.directions);
+      } else if ((data.direct_routes || []).length > 0) {
+        msg = `სახლამდე პირდაპირი მარშრუტები: ${data.direct_routes.join(', ')}.`;
+        renderHomeRouteResults(data);
+      } else {
+        msg = `სახლთან ახლოს ${(data.home_stops || []).length} გაჩერება. პირდაპირი მარშრუტი ვერ მოიძებნა.`;
+        renderHomeRouteResults(data);
+      }
+
+      setResponse(msg); await speak(msg); setStatus('მზადაა ✓', 'ok');
+    } catch(e) { setStatus('შეცდომა', 'error'); console.error(e); }
+  };
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => doHomeRoute(pos.coords.latitude, pos.coords.longitude),
+      ()  => doHomeRoute(savedHome.lat, savedHome.lng)
+    );
+  } else {
+    doHomeRoute(savedHome.lat, savedHome.lng);
+  }
+}
+
+// 2. Add this new renderDirections function:
+function renderDirections(directions) {
+  resultsEl.innerHTML = '';
+  const hdr = document.createElement('div');
+  hdr.className = 'section-hdr';
+  hdr.textContent = `🗺️ მარშრუტი (${directions.total_duration})`;
+  resultsEl.appendChild(hdr);
+
+  (directions.steps || []).forEach(step => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-top:10px;animation:slideUp 0.3s ease';
+
+    if (step.type === 'walking') {
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">🚶</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--text)">ფეხით ${step.distance}</div>
+            <div style="font-size:12px;color:var(--text3)">${step.duration} · ${step.instructions || ''}</div>
+          </div>
+        </div>`;
+    } else if (step.type === 'transit') {
+      card.style.borderLeft = '4px solid var(--accent2)';
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">🚌</span>
+          <div style="flex:1">
+            <div style="font-size:16px;font-weight:700;color:var(--accent2)">${step.line_name}-ე მარშრუტი</div>
+            <div style="font-size:13px;color:var(--text);margin-top:3px">
+              ${step.departure_time} · ${step.depart_stop}
+            </div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px">
+              ${step.num_stops} გაჩერება → ${step.arrive_stop} (${step.arrival_time})
+            </div>
+          </div>
+        </div>`;
+    }
+    resultsEl.appendChild(card);
+  });
+}
+
+// 3. Also update homeSaveBtn to use the /geocode endpoint:
+homeSaveBtn.addEventListener('click', async () => {
+  const addr = homeAddrInput.value.trim();
+  if (!addr) return;
+  homeStatus.textContent = 'გეოკოდირება...';
+  try {
+    // Try backend geocode (uses Google Maps or Nominatim)
+    const res = await apiFetch(`/geocode?address=${encodeURIComponent(addr)}`);
+    if (res.ok) {
+      const data = await res.json();
+      savedHome = { address: addr, lat: data.lat, lng: data.lng };
+      localStorage.setItem('tbilisi_home', JSON.stringify(savedHome));
+      homeStatus.textContent = `✓ შენახულია (${data.lat.toFixed(4)}, ${data.lng.toFixed(4)})`;
+      homeToggleBtn.classList.add('active');
+    } else {
+      homeStatus.textContent = '⚠️ მისამართი ვერ მოიძებნა';
+    }
+  } catch {
+    homeStatus.textContent = '⚠️ კავშირის შეცდომა';
+  }
+});
+
+// ── Recording ─────────────────────────────────────────────────────────────────
+const micBtn = document.getElementById('mic-btn');
+let mediaRecorder, chunks = [], recording = false;
+micBtn.addEventListener('click', toggle);
+micBtn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+
+async function toggle() { recording ? stopRec() : await startRec(); }
+
+async function startRec() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+    chunks = [];
+    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+    mediaRecorder.onstop = processAudio;
+    mediaRecorder.start();
+    recording = true;
+    micBtn.classList.add('recording');
+    micBtn.setAttribute('aria-pressed', 'true');
+    micBtn.querySelector('.btn-label').textContent = 'გაჩერება';
+    setStatus('ჩაწერა...', 'active');
+  } catch { setStatus('მიკროფონი მიუწვდომელია', 'error'); }
+}
+
+function stopRec() {
+  mediaRecorder.stop();
+  mediaRecorder.stream.getTracks().forEach(t => t.stop());
+  recording = false;
+  micBtn.classList.remove('recording');
+  micBtn.setAttribute('aria-pressed', 'false');
+  micBtn.querySelector('.btn-label').textContent = 'ლაპარაკი';
+  setStatus('დამუშავება...', 'active');
+}
+
+// ── Pipeline ──────────────────────────────────────────────────────────────────
+async function processAudio() {
+  hideBusOffer(); resultsEl.innerHTML = '';
+  const blob = new Blob(chunks, { type: 'audio/webm' });
+  const form = new FormData();
+  form.append('audio', blob, 'recording.webm');
+  try {
+    setStatus('გამოთქმის ამოცნობა...', 'active');
+    const sttRes = await apiFetch('/transcribe?engine=google', { method: 'POST', body: form });
+    if (!sttRes.ok) throw new Error('STT failed');
+    const stt = await sttRes.json();
+    const said = stt.text?.trim();
+    if (!said) { setStatus('ვერ გავიგე, სცადეთ თავიდან', 'error'); return; }
+    setTranscript(said);
+    await runQuery(said);
+  } catch (err) { setStatus('შეცდომა — შეამოწმეთ კავშირი', 'error'); console.error(err); }
+}
+
+async function processText(text) {
+  hideBusOffer(); resultsEl.innerHTML = '';
+  setTranscript(text);
+  await runQuery(text);
+}
+
+async function runQuery(text) {
+  setStatus('პასუხის მოძებნა...', 'active');
+  try {
+    const body = { text };
+    if (_lastGPS) { body.lat = _lastGPS.lat; body.lng = _lastGPS.lng; }
+
+    const qRes = await apiFetch('/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!qRes.ok) throw new Error('Query failed');
+    const q = await qRes.json();
+
+    if (q.intent === 'home_route') { await triggerHomeRoute(); return; }
+
+    setResponse(q.response_text);
+
+    // Show directions if returned (Google Maps journey)
+    if (q.directions && q.directions.steps && q.directions.steps.length > 0) {
+      renderDirections(q.directions);
+    } else {
+      renderResults(q);
+    }
+
+    if (q.venue_bus_offer) showBusOffer(q.venue_bus_offer);
+    setStatus('ხმის სინთეზი...', 'active');
+    await speak(q.response_text);
+    setStatus('მზადაა ✓', 'ok');
+  } catch (err) { setStatus('შეცდომა', 'error'); console.error(err); }
+}
+
+// 3. ADD renderDirections function (add alongside renderResults):
+function renderDirections(directions) {
+  resultsEl.innerHTML = '';
+
+  const total = directions.total_duration || '';
+  const dep   = directions.departure_time || '';
+  const arr   = directions.arrival_time   || '';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'section-hdr';
+  hdr.textContent = `🗺️ Google Maps-ის მარშრუტი${total ? ' · ' + total : ''}`;
+  resultsEl.appendChild(hdr);
+
+  if (dep || arr) {
+    const info = document.createElement('div');
+    info.style.cssText = 'padding:6px 2px 10px;font-size:13px;color:var(--text2)';
+    info.textContent = [dep && `გამგზავრება: ${dep}`, arr && `ჩამოსვლა: ${arr}`]
+      .filter(Boolean).join('  →  ');
+    resultsEl.appendChild(info);
+  }
+
+  (directions.steps || []).forEach(step => {
+    const card = document.createElement('article');
+    card.style.cssText = `
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:12px;padding:14px 16px;margin-top:10px;
+      animation:slideUp 0.3s ease;display:flex;align-items:flex-start;gap:12px`;
+
+    if (step.type === 'walking') {
+      card.innerHTML = `
+        <span style="font-size:24px;flex-shrink:0">🚶</span>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text)">
+            ფეხით ${step.distance || ''}
+          </div>
+          <div style="font-size:12px;color:var(--text3);margin-top:3px">
+            ${step.duration || ''}${step.instructions ? ' · ' + step.instructions : ''}
+          </div>
+        </div>`;
+    } else if (step.type === 'transit') {
+      card.style.borderLeft = '4px solid var(--accent2)';
+      card.innerHTML = `
+        <span style="font-size:26px;flex-shrink:0">🚌</span>
+        <div style="flex:1">
+          <div style="font-size:18px;font-weight:700;color:var(--accent2)">
+            ${step.line_name}-ე მარშრუტი
+          </div>
+          <div style="font-size:13px;color:var(--text);margin-top:5px">
+            <b>${step.departure_time || ''}</b>
+            ${step.depart_stop ? '· ' + step.depart_stop : ''}
+          </div>
+          <div style="font-size:12px;color:var(--text3);margin-top:3px">
+            ${step.num_stops || 0} გაჩერება
+            ${step.arrive_stop ? '→ ' + step.arrive_stop : ''}
+            ${step.arrival_time ? '(' + step.arrival_time + ')' : ''}
+          </div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">
+            ${step.duration || ''}
+          </div>
+        </div>`;
+    }
+    resultsEl.appendChild(card);
+  });
+}
+
+// 4. REPLACE bus-offer "yes" button to pass GPS + show directions:
+document.getElementById('bus-offer-yes').addEventListener('click', async () => {
+  const venue = currentVenueOffer;
+  hideBusOffer();
+  setStatus('მარშრუტს ვეძებ...', 'active');
+  resultsEl.innerHTML = '';
+
+  const doJourney = async (lat, lng) => {
+    try {
+      const locParam = (lat != null && lng != null) ? `&lat=${lat}&lng=${lng}` : '';
+      const res = await apiFetch(`/journey?q=${encodeURIComponent(venue)}${locParam}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        setResponse(data.detail || 'ავტობუსი ვერ მოიძებნა.');
+      } else if (data.directions && data.directions.steps?.length) {
+        const steps = data.directions.steps.filter(s => s.type === 'transit');
+        const total = data.directions.total_duration || '';
+        const msg = steps.length
+          ? `${venue}-ში: ${steps[0].line_name}-ე ავტობუსი ${steps[0].departure_time || ''}-ზე. სულ ${total}.`
+          : `${venue}-ში მარშრუტი: ${total}.`;
+        setResponse(msg);
+        renderDirections(data.directions);
+        await speak(msg);
+      } else {
+        const msg = data.response_georgian || `${venue}-სთან ავტობუსი ნაპოვნია.`;
+        setResponse(msg);
+        renderJourneyCards(data.stops || []);
+        await speak(msg);
+      }
+    } catch { setStatus('შეცდომა', 'error'); }
+    setStatus('მზადაა ✓', 'ok');
+  };
+
+  if (_lastGPS) {
+    doJourney(_lastGPS.lat, _lastGPS.lng);
+  } else if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => doJourney(pos.coords.latitude, pos.coords.longitude),
+      ()  => doJourney(null, null)
+    );
+  } else {
+    doJourney(null, null);
+  }
+});
+
+// ── TTS ───────────────────────────────────────────────────────────────────────
+async function speak(text) {
+  // Truncate for TTS — voice doesn't need to read >600 chars
+  // Cut at sentence boundary to avoid mid-word cutoff
+  let ttsText = text;
+  if (ttsText.length > 600) {
+    // Find last sentence end before 600 chars
+    const cutoff = ttsText.substring(0, 600);
+    const lastSent = Math.max(
+      cutoff.lastIndexOf('. '),
+      cutoff.lastIndexOf('? '),
+      cutoff.lastIndexOf('! '),
+      cutoff.lastIndexOf('.\n'),
+    );
+    ttsText = lastSent > 200 ? cutoff.substring(0, lastSent + 1) : cutoff;
+    ttsText += ' ...';
+  }
+  try {
+    const res = await apiFetch('/synthesize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: ttsText, language_code: 'ka-GE' }),
+    });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    if (audioEl._objectUrl) URL.revokeObjectURL(audioEl._objectUrl);
+    audioEl._objectUrl = url;
+    audioEl.src = url;
+    audioEl.style.display = 'block';
+    audioEl.load();
+    await new Promise(resolve => audioEl.addEventListener('canplay', resolve, { once: true }));
+    audioEl.play();
+  } catch (e) { console.warn('TTS:', e); }
+}
+
+// 2. REPLACE renderDirections() with cleaner version
+//    that hides street addresses and shows clean stop names:
+
+function renderDirections(directions) {
+  resultsEl.innerHTML = '';
+
+  const total = directions.total_duration || '';
+  const dep   = directions.departure_time || '';
+  const arr   = directions.arrival_time   || '';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'section-hdr';
+  hdr.textContent = `🗺️ Google Maps-ის მარშრუტი${total ? ' · ' + total : ''}`;
+  resultsEl.appendChild(hdr);
+
+  if (dep || arr) {
+    const info = document.createElement('div');
+    info.style.cssText = 'padding:6px 2px 10px;font-size:13px;color:var(--text2)';
+    info.textContent = [dep && `გამგზავრება: ${dep}`, arr && `ჩამოსვლა: ${arr}`]
+      .filter(Boolean).join('  →  ');
+    resultsEl.appendChild(info);
+  }
+
+  (directions.steps || []).forEach(step => {
+    const card = document.createElement('article');
+    card.style.cssText = [
+      'background:var(--surface)',
+      'border:1px solid var(--border)',
+      'border-radius:12px',
+      'padding:14px 16px',
+      'margin-top:10px',
+      'animation:slideUp 0.3s ease',
+      'display:flex',
+      'align-items:flex-start',
+      'gap:12px',
+    ].join(';');
+
+    if (step.type === 'walking') {
+      // Only show walking steps that are meaningful (>50m)
+      const dist = step.distance || '';
+      const distM = parseFloat(dist);
+      // Skip tiny walking steps at end (street addresses)
+      if (dist.includes('კმ') || distM > 50 || isNaN(distM)) {
+        card.innerHTML = `
+          <span style="font-size:22px;flex-shrink:0">🚶</span>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)">
+              ფეხით ${dist}
+            </div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px">
+              ${step.duration || ''}
+            </div>
+          </div>`;
+        resultsEl.appendChild(card);
+      }
+    } else if (step.type === 'transit') {
+      card.style.borderLeft = '4px solid var(--accent2)';
+      card.innerHTML = `
+        <span style="font-size:26px;flex-shrink:0">🚌</span>
+        <div style="flex:1">
+          <div style="font-size:18px;font-weight:700;color:var(--accent2)">
+            ${step.line_name}-ე მარშრუტი
+          </div>
+          <div style="font-size:13px;color:var(--text);margin-top:5px">
+            <b>${step.departure_time || ''}</b>
+            ${step.depart_stop ? '· ' + step.depart_stop : ''}
+          </div>
+          <div style="font-size:12px;color:var(--text3);margin-top:3px">
+            ${step.num_stops || 0} გაჩერება
+            ${step.arrive_stop ? '→ ' + step.arrive_stop : ''}
+            ${step.arrival_time ? '· (' + step.arrival_time + ')' : ''}
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">
+            ${step.duration || ''}
+          </div>
+        </div>`;
+      resultsEl.appendChild(card);
+    }
+  });
+}
+
+// ── Bus offer ─────────────────────────────────────────────────────────────────
+let currentVenueOffer = '';
+function showBusOffer(venue) {
+  currentVenueOffer = venue;
+  document.getElementById('bus-offer-text').textContent = `გსურთ ${venue}-სკენ მიმავალი ავტობუსები?`;
+  busOffer.classList.add('visible');
+}
+function hideBusOffer() { busOffer.classList.remove('visible'); currentVenueOffer = ''; }
+document.getElementById('bus-offer-no').addEventListener('click', hideBusOffer);
+// ── PATCH for frontend/index.html ──────────────────────────────────────────
+// Replace the entire bus-offer "yes" button handler with this:
+
+document.getElementById('bus-offer-yes').addEventListener('click', async () => {
+  const venue = currentVenueOffer;
+  hideBusOffer();
+  setStatus('მარშრუტს ვეძებ...', 'active');
+  resultsEl.innerHTML = '';
+
+  const doJourney = async (lat, lng) => {
+    try {
+      const locParam = (lat && lng) ? `&lat=${lat}&lng=${lng}` : '';
+      const res = await apiFetch(`/journey?q=${encodeURIComponent(venue)}${locParam}`);
+      const data = await res.json();
+      if (!res.ok) {
+        setResponse(data.detail || 'ავტობუსი ვერ მოიძებნა.');
+      } else if (data.directions) {
+        // Google Maps directions available
+        const steps = (data.directions.steps || []).filter(s => s.type === 'transit');
+        const total = data.directions.total_duration || '';
+        let msg = steps.length > 0
+          ? `${venue}-ში სასვლელად: ${steps[0].line_name}-ე ავტობუსი ${steps[0].departure_time}-ზე. სულ ${total}.`
+          : `${venue}-ში მარშრუტი ნაპოვნია. სულ ${total}.`;
+        setResponse(msg);
+        renderDirections(data.directions);
+        await speak(msg);
+      } else {
+        setResponse(data.response_georgian);
+        renderJourneyCards(data.stops || []);
+        await speak(data.response_georgian);
+      }
+    } catch { setStatus('შეცდომა', 'error'); }
+    setStatus('მზადაა ✓', 'ok');
+  };
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => doJourney(pos.coords.latitude, pos.coords.longitude),
+      ()  => doJourney(null, null)
+    );
+  } else {
+    doJourney(null, null);
+  }
+});
+
+// ── Also add renderDirections function if not already present ──────────────
+function renderDirections(directions) {
+  resultsEl.innerHTML = '';
+  const hdr = document.createElement('div');
+  hdr.className = 'section-hdr';
+  hdr.textContent = `🗺️ მარშრუტი (${directions.total_duration || ''})`;
+  resultsEl.appendChild(hdr);
+
+  if (directions.departure_time && directions.arrival_time) {
+    const info = document.createElement('div');
+    info.style.cssText = 'padding:8px 2px;font-size:13px;color:var(--text2)';
+    info.textContent = `${directions.departure_time}-ზე გამგზავრება → ${directions.arrival_time}-ზე ჩამოსვლა`;
+    resultsEl.appendChild(info);
+  }
+
+  (directions.steps || []).forEach(step => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-top:10px;animation:slideUp 0.3s ease';
+    if (step.type === 'walking') {
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:24px">🚶</span>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)">ფეხით ${step.distance || ''}</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px">${step.duration || ''} · ${step.instructions || ''}</div>
+          </div>
+        </div>`;
+    } else if (step.type === 'transit') {
+      card.style.borderLeft = '4px solid var(--accent2)';
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:24px">🚌</span>
+          <div style="flex:1">
+            <div style="font-size:17px;font-weight:700;color:var(--accent2)">${step.line_name}-ე მარშრუტი</div>
+            <div style="font-size:13px;color:var(--text);margin-top:4px">
+              <b>${step.departure_time}</b> · ${step.depart_stop}
+            </div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px">
+              ${step.num_stops} გაჩერება → ${step.arrive_stop}
+              ${step.arrival_time ? ` (${step.arrival_time})` : ''}
+            </div>
+          </div>
+        </div>`;
+    }
+    resultsEl.appendChild(card);
+  });
+}
+
+// ── Description modal ─────────────────────────────────────────────────────────
+document.getElementById('desc-close').addEventListener('click', () => {
+  document.getElementById('desc-modal').classList.remove('visible');
+});
+
+function showDescription(name, venue, description) {
+  document.getElementById('desc-name').textContent = name;
+  document.getElementById('desc-venue').textContent = venue && venue !== 'N/A' ? `📍 ${venue}` : '';
+  const body = document.getElementById('desc-body');
+  if (description && description.trim()) {
+    body.textContent = description;
+  } else {
+    body.textContent = 'აღწერა არ არის ხელმისაწვდომი.';
+  }
+  document.getElementById('desc-modal').classList.add('visible');
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+const resultsEl = document.getElementById('results');
+const busOffer  = document.getElementById('bus-offer');
+const audioEl   = document.getElementById('response-audio');
+
+function renderResults({ intent, results }) {
+  resultsEl.innerHTML = '';
+  if (!results?.length) return;
+
+  if (intent === 'concert_search') {
+    const hdr = document.createElement('div');
+    hdr.className = 'section-hdr';
+    hdr.textContent = `🎭 ნაპოვნი ღონისძიებები (${results.length})`;
+    resultsEl.appendChild(hdr);
+    results.forEach(c => resultsEl.appendChild(makeConcertCard(c)));
+
+  } else if (intent === 'bus_search') {
+    const hdr = document.createElement('div');
+    hdr.className = 'section-hdr';
+    hdr.textContent = '🚌 გაჩერებები და გრაფიკი';
+    resultsEl.appendChild(hdr);
+    results.forEach(stop => resultsEl.appendChild(makeBusCard(stop)));
+
+  } else if (intent === 'journey_search') {
+    renderJourneyCards(results);
+  }
+}
+
+function makeConcertCard(c) {
+  const isSoldOut = c.price === 'გაყიდულია';
+  const isFree    = c.price === 'უფასო';
+  const priceClass = isSoldOut ? 'price-sold' : isFree ? 'price-free' : 'price-paid';
+  const priceLabel = isSoldOut ? '🔴 გაყიდულია' : isFree ? '🟢 უფასო' : `💰 ${c.price}`;
+
+  const cat = c.category || 'კონცერტი';
+  const catClass = cat === 'თეატრი' ? 'cat-theatre' : cat === 'ოპერა' ? 'cat-opera' : 'cat-concert';
+  const catIcon  = cat === 'თეატრი' ? '🎭' : cat === 'ოპერა' ? '🎤' : '🎵';
+
+  const card = document.createElement('article');
+  card.className = 'concert-card';
+  card.innerHTML = `
+    <div class="concert-card-top">
+      <div class="concert-name">${c.name}<span class="cat-badge ${catClass}">${catIcon} ${cat}</span></div>
+      <div class="concert-venue-line">📍 ${c.venue !== 'N/A' ? c.venue : 'ადგილი უცნობია'}</div>
+    </div>
+    <div class="concert-card-meta">
+      <div class="meta-cell"><div class="meta-cell-label">📅 თარიღი</div><div class="meta-cell-value">${c.date}</div></div>
+      <div class="meta-cell"><div class="meta-cell-label">🕐 დრო</div><div class="meta-cell-value">${c.time !== 'N/A' ? c.time : '—'}</div></div>
+    </div>
+    <div class="concert-card-bottom">
+      <span class="price-badge ${priceClass}">${priceLabel}</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${c.description ? `<button class="desc-btn" data-name="${encodeURIComponent(c.name)}" data-venue="${encodeURIComponent(c.venue)}" data-desc="${encodeURIComponent(c.description)}">📖 აღწერა</button>` : ''}
+        ${c.url !== 'N/A' && !isSoldOut ? `<a class="ticket-btn" href="${c.url}" target="_blank" rel="noopener">ბილეთი →</a>` : ''}
+      </div>
+    </div>
+  `;
+  // Attach description button handler
+  const descBtn = card.querySelector('.desc-btn');
+  if (descBtn) {
+    descBtn.addEventListener('click', () => {
+      showDescription(
+        decodeURIComponent(descBtn.dataset.name),
+        decodeURIComponent(descBtn.dataset.venue),
+        decodeURIComponent(descBtn.dataset.desc),
+      );
+    });
+  }
+  return card;
+}
+
+ffunction makeBusCard(stop, distanceM) {
+  const now = new Date();
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+
+  const stopName = (stop.name || stop.stop_name || '')
+    .replace(/\s*\[\d+\]/g, '')
+    .replace(/^მ\/ს\s*["']?/, '')
+    .replace(/["']$/, '')
+    .trim();
+
+  const dist = distanceM != null ? distanceM : stop.distance_m;
+  const distLabel = dist != null
+    ? (dist < 1000 ? `${dist}მ` : `${(dist/1000).toFixed(1)}კმ`)
+    : '';
+
+  // Walking time: prefer API value, else calculate at 80m/min
+  const walkMins = stop.walk_minutes || (dist ? Math.max(1, Math.round(dist / 80)) : null);
+  const walkLabel = stop.walk_duration || (walkMins ? `${walkMins} წთ` : '');
+  const walkDist  = stop.walk_distance || distLabel;
+
+  const routeNum  = stop.route_number || '';
+  const headsign  = stop.headsign || '';
+  const depTime   = stop.departure_time || '';  // real departure from Google Maps
+
+  // Build schedule chips
+  let schedHTML = '';
+
+  if (depTime) {
+    // Google Maps real departure time
+    const minsUntil = stop.walk_minutes ? stop.walk_minutes : 0;
+    const chipClass = minsUntil <= 5 ? 'time-chip soon' : 'time-chip';
+    schedHTML = `
+      <div class="bus-times-section">
+        <div class="bus-times-label">
+          🚌 ${routeNum ? routeNum + '-ე მარშრუტი' : 'ავტობუსი'}
+          ${headsign ? `<span style="font-weight:400;color:var(--text3)"> → ${headsign}</span>` : ''}
+        </div>
+        <div class="times-grid" style="margin-top:8px">
+          <span class="${chipClass}">${depTime}</span>
+        </div>
+        ${walkLabel ? `<div style="font-size:12px;color:var(--text3);margin-top:6px">🚶 ${walkDist} სიარული — ${walkLabel}</div>` : ''}
+      </div>`;
+  } else {
+    // TTC CSV schedule
+    const schedule = stop.schedule || [];
+    const times = schedule
+      .flatMap(h => h.departures.map(m => ({
+        h: h.hour, m: parseInt(m),
+        total: h.hour * 60 + parseInt(m)
+      })))
+      .filter(t => t.total > nowMins)
+      .slice(0, 5)
+      .map(t => ({
+        label: `${String(t.h).padStart(2,'0')}:${String(t.m).padStart(2,'0')}`,
+        soon: (t.total - nowMins) <= 10
+      }));
+
+    if (times.length > 0) {
+      schedHTML = `
+        <div class="bus-times-section">
+          <div class="bus-times-label">შემდეგი ავტობუსები${routeNum ? ' · ' + routeNum + '-ე' : ''}</div>
+          <div class="times-grid">
+            ${times.map(t => `<span class="time-chip${t.soon?' soon':''}">${t.label}${t.soon?' ⚡':''}</span>`).join('')}
+          </div>
+          ${walkLabel ? `<div style="font-size:12px;color:var(--text3);margin-top:6px">🚶 ${walkLabel} სიარული</div>` : ''}
+        </div>`;
+    } else if (schedule.length > 0) {
+      schedHTML = `<div class="bus-times-section"><div class="no-more-buses">დღის ბოლო რეისი გავიდა</div></div>`;
+    }
+    // No schedule at all = no section shown
+  }
+
+  const card = document.createElement('article');
+  card.className = 'bus-card';
+  card.innerHTML = `
+    <div class="bus-card-header">
+      <div class="bus-stop-name">${stopName}</div>
+      ${distLabel ? `<span class="bus-dist-badge">${distLabel}</span>` : ''}
+    </div>
+    ${schedHTML}`;
+  return card;
+}
+
+function renderJourneyCards(stops) {
+  resultsEl.innerHTML = '';
+  const hdr = document.createElement('div');
+  hdr.className = 'section-hdr';
+  hdr.textContent = '🚌 შესაბამისი მარშრუტები';
+  resultsEl.appendChild(hdr);
+
+  const byRoute = {};
+  stops.forEach(s => { if (!byRoute[s.route_number]) byRoute[s.route_number] = s; });
+
+  Object.entries(byRoute).forEach(([route, stop]) => {
+    const now = new Date();
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+    const times = (stop.schedule || [])
+      .flatMap(h => h.departures.map(m => ({ h: h.hour, m: parseInt(m), total: h.hour*60+parseInt(m) })))
+      .filter(t => t.total > nowMins)
+      .slice(0, 4)
+      .map(t => ({ label: `${String(t.h).padStart(2,'0')}:${String(t.m).padStart(2,'0')}`, mins: t.total - nowMins, soon: (t.total - nowMins) <= 10 }));
+
+    const stopName = (stop.stop_name || '').replace(/\s*\[\d+\]/g, '').replace(/^მ\/ს\s*["']?/, '').replace(/["']$/, '').trim();
+    const card = document.createElement('article');
+    card.className = 'journey-card';
+    card.innerHTML = `
+      <div class="journey-route-num">${route}-ე მარშრუტი</div>
+      <div class="journey-route-label">📍 ${stopName}</div>
+      ${times.length ? `
+        <div class="bus-times-label" style="margin-top:8px">შემდეგი ავტობუსები</div>
+        <div class="times-grid" style="margin-top:6px">
+          ${times.map(t => `<span class="time-chip${t.soon ? ' soon' : ''}">${t.label} <small style="font-size:11px;opacity:0.8">${t.mins}წთ${t.soon ? ' ⚡' : ''}</small></span>`).join('')}
+        </div>
+      ` : '<div class="no-more-buses" style="margin-top:6px">დღის ბოლო რეისი გავიდა</div>'}
+    `;
+    resultsEl.appendChild(card);
+  });
+}
+
+function renderNearestStops(stops) {
+  resultsEl.innerHTML = '';
+  const hdr = document.createElement('div');
+  hdr.className = 'section-hdr';
+  hdr.textContent = `📍 ახლომდებარე გაჩერებები (${stops.length})`;
+  resultsEl.appendChild(hdr);
+  stops.forEach(s => resultsEl.appendChild(makeBusCard(s, s.distance_m)));
+}
+
+function renderHomeRouteResults(data) {
+  resultsEl.innerHTML = '';
+
+  if (data.direct_routes.length) {
+    const hdr = document.createElement('div');
+    hdr.className = 'section-hdr';
+    hdr.textContent = `✅ პირდაპირი მარშრუტები სახლამდე`;
+    resultsEl.appendChild(hdr);
+    // Show home stops that have direct routes
+    data.home_stops.filter(s => s.serves_current_location).forEach(s => resultsEl.appendChild(makeBusCard(s, s.distance_m)));
+  }
+
+  const hdr2 = document.createElement('div');
+  hdr2.className = 'section-hdr';
+  hdr2.textContent = '🏠 სახლთან ახლოს გაჩერებები';
+  resultsEl.appendChild(hdr2);
+  data.home_stops.slice(0, 5).forEach(s => resultsEl.appendChild(makeBusCard(s, s.distance_m)));
+}
+
+// ── Text input ────────────────────────────────────────────────────────────────
+const textInput = document.getElementById('text-input');
+const textSend  = document.getElementById('text-send');
+textSend.addEventListener('click', () => { const t = textInput.value.trim(); if (t) { processText(t); textInput.value = ''; } });
+textInput.addEventListener('keydown', e => { if (e.key === 'Enter') { const t = textInput.value.trim(); if (t) { processText(t); textInput.value = ''; } } });
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const statusBar    = document.getElementById('status-bar');
+const transcriptEl = document.getElementById('transcript');
+const responseEl   = document.getElementById('response-text');
+
+function setStatus(msg, cls) { statusBar.textContent = msg; statusBar.className = cls || ''; }
+function setTranscript(text) { transcriptEl.textContent = text; transcriptEl.classList.remove('empty'); }
+function setResponse(text)   { responseEl.textContent = text;   responseEl.classList.remove('empty'); }
+</script>
+</body>
+</html>
