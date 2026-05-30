@@ -3,11 +3,27 @@
 venv/
 env/
 
-# Environment variables
+# Environment variables and sensitive credentials
 .env
+*.json
 
 # PyCharm/IDE settings
 .idea/
+
+# Python cache and compiled files
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Logs and databases
 *.log
+*.db
+*.sqlite
+
+# Data files (Optional: keep if you want to exclude your local CSVs from tracking)
+# *.csv
+
+# OS-specific files
+.DS_Store
+Thumbs.db
