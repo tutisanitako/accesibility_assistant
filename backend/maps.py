@@ -94,14 +94,12 @@ def get_transit_directions(
     origin_lat: float, origin_lng: float,
     dest_lat: float, dest_lng: float,
     language: str = 'ka',
+    departure_time: int | None = None,
 ) -> dict | None:
-    """
-    Get transit directions between two coordinates.
-    Returns a dict with steps, duration, departure_time etc.
-    Returns None if unavailable.
-    """
     if not _maps_key_available():
         return None
+
+    dep_param = str(int(departure_time)) if departure_time else 'now'   # ← ADD THIS
 
     url = (
         'https://maps.googleapis.com/maps/api/directions/json'
@@ -110,7 +108,8 @@ def get_transit_directions(
         f'&mode=transit'
         f'&transit_mode=bus'
         f'&language={language}'
-        f'&departure_time=now'
+        f'&departure_time={dep_param}'                                   # ← CHANGE THIS (was 'now')
+        f'&alternatives=false'
         f'&key={_MAPS_KEY}'
     )
     try:

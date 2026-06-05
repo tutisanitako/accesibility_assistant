@@ -19,12 +19,10 @@ _DAY_ORDINAL = {
     24:'ოცდაოთხ',25:'ოცდახუთ',26:'ოცდაექვს',27:'ოცდაშვიდ',28:'ოცდარვა',
     29:'ოცდაცხრა',30:'ოცდაათ',31:'ოცდათერთმეტ',
 }
-# Stem forms for locative: nominative → locative stem (drop terminal ი → empty, ა → ა, etc.)
-# Hours — stem form used in "X საათსა და Y წუთზე"
 _HOUR_STEM = {
     0:'შუაღამ',1:'ერთ',2:'ორ',3:'სამ',4:'ოთხ',5:'ხუთ',6:'ექვს',
     7:'შვიდ',8:'რვა',9:'ცხრა',10:'ათ',11:'თერთმეტ',12:'თორმეტ',
-    13:'ერთ',14:'ორ',15:'სამ',16:'ოთხ',17:'ხუთ',18:'ექვს',
+    13:'პირველ',14:'ორ',15:'სამ',16:'ოთხ',17:'ხუთ',18:'ექვს',
     19:'შვიდ',20:'რვა',21:'ცხრა',22:'ათ',23:'თერთმეტ',
 }
 _MIN_STEM = {
@@ -44,12 +42,12 @@ _MIN_STEM = {
     58:'ორმოცდათვრამეტ',59:'ორმოცდაცხრამეტ',
 }
 _HOUR_PREFIX = {
-    (0,):   'შუაღამ',
-    (1,2,3,4): 'ღამის',
-    (5,6,7,8,9,10,11): 'დილის',
-    (12,):  'შუადღ',
-    (13,14,15,16,17): '',
-    (18,19,20,21,22,23): 'საღამოს',
+    frozenset([0]):              'შუაღამ',
+    frozenset([1,2,3,4]):        'ღამის',
+    frozenset([5,6,7,8,9,10,11]):'დილის',
+    frozenset([12]):              'შუადღ',
+    frozenset([13,14,15,16,17]): '',
+    frozenset([18,19,20,21,22,23]):'საღამოს',
 }
 
 _NON_TBILISI = {'სენაკ','ბათუმ','ქუთაის','გორ','რუსთავ','ზუგდიდ','ფოთ',
@@ -67,35 +65,28 @@ _DESC_WORKER = Path(__file__).parent.parent / 'scrapers' / '_desc_worker.py'
 # ── Time helpers ──────────────────────────────────────────────────────────────
 
 def _get_prefix(h: int) -> str:
-    for hs, p in _HOUR_PREFIX.items():
-        if h in hs: return p
+    for s, p in _HOUR_PREFIX.items():
+        if h in s: return p
     return ''
 
 def _time_to_georgian(time_str: str) -> str:
-    """
-    '16:49' → 'ოთხ საათსა და ორმოცდაცხრა წუთზე'
-    '14:00' → 'ორ საათზე'
-    Uses stem (locative) forms throughout.
-    """
+    """'16:49' → 'ოთხ საათსა და ორმოცდაცხრა წუთზე' (stems, locative)"""
     if not time_str or ':' not in time_str: return time_str
     try:
         h, m = map(int, time_str.split(':'))
+        if h in (0, 12):
+            base = 'ღამის თორმეტ საათზე' if h == 0 else 'შუადღის თორმეტ საათზე'
+            if m == 0: return base
+            m_stem = _MIN_STEM.get(m, str(m))
+            return f'{base[:-1]}ს და {m_stem} წუთზე'
         prefix = _get_prefix(h)
-        # 13-23 display as 1-11
         hd = h if h <= 12 else h - 12
         h_stem = _HOUR_STEM.get(hd, str(hd))
-        if h in (0, 12):
-            hour_part = 'შუაღამეს' if h == 0 else 'შუადღეს'
-            if m == 0: return hour_part
-            m_stem = _MIN_STEM.get(m, str(m))
-            return f'{hour_part[:-1]}ს და {m_stem} წუთზე'
         hour_spoken = f'{prefix} {h_stem}'.strip() if prefix else h_stem
-        if m == 0:
-            return f'{hour_spoken} საათზე'
+        if m == 0: return f'{hour_spoken} საათზე'
         m_stem = _MIN_STEM.get(m, str(m))
         return f'{hour_spoken} საათსა და {m_stem} წუთზე'
-    except Exception:
-        return time_str
+    except Exception: return time_str
 
 def _speakable_time(time_str: str) -> str:
     return _time_to_georgian(time_str) if time_str and time_str != 'N/A' else ''
@@ -110,60 +101,93 @@ def _speakable_date(date_str: str) -> str:
         return f'{_DAY_ORDINAL.get(day, str(day))} {_MONTH_GEN[month_num]}'
     except (ValueError, KeyError): return date_str
 
+def _mins_until(time_str: str) -> int | None:
+    """Minutes from now until the given HH:MM time (today)."""
+    try:
+        h, m = map(int, time_str.split(':'))
+        now = datetime.now()
+        diff = (h * 60 + m) - (now.hour * 60 + now.minute)
+        return diff if diff >= 0 else None
+    except Exception: return None
+
 
 # ── Georgian noun case helpers ────────────────────────────────────────────────
+# IMPORTANT: these return the complete inflected form. Do NOT append extra
+# case suffixes after calling them (no `-ში`, no `-ის`).
 
 def _geo_genitive(phrase: str) -> str:
     """
-    Convert last word of phrase to genitive (-ის suffix).
-    "131-ე საჯარო სკოლა" → "131-ე საჯარო სკოლის"
-    "ნუგზარ საჯაიას ქუჩა" → "ნუგზარ საჯაიას ქუჩის"
-    "თავისუფლების მოედანი" → "თავისუფლების მოედნის"  (approx)
+    Returns phrase with last word in genitive case.
+    RESULT ALREADY ENDS WITH GENITIVE SUFFIX — do not append '-ის' after!
+    e.g. "131-ე საჯარო სკოლა" → "131-ე საჯარო სკოლის"
+         "თავისუფლების მოედანი" → "თავისუფლების მოედნის"  (approx)
     """
     if not phrase: return phrase
     words = phrase.split()
-    last = words[-1]
-    if re.search(r'[0-9]', last):
-        # Numeric/mixed: append -ის
-        words[-1] = last + 'ის' if not last.endswith('ის') else last
+    last  = words[-1]
+    if re.search(r'[0-9]', last) and not last.endswith('ის'):
+        words[-1] = last + 'ის'
+    elif last.endswith('ის') or last.endswith('ს') and len(last) > 3:
+        pass  # already genitive
     elif last.endswith('ი'):
         words[-1] = last[:-1] + 'ის'
     elif last.endswith('ა'):
         words[-1] = last[:-1] + 'ის'
     elif last.endswith('ე') or last.endswith('ო'):
         words[-1] = last + 'ს'
-    elif last.endswith('ის') or last.endswith('ს'):
-        pass  # already genitive
     else:
         words[-1] = last + 'ის'
     return ' '.join(words)
 
+
 def _geo_locative(phrase: str) -> str:
     """
-    Convert phrase to locative (-ში constructions).
-    "თავისუფალი თეატრი" → "თავისუფალ თეატრში"
-    "რუსთაველის მეტრო" → "რუსთაველის მეტროში"
-    "131-ე საჯარო სკოლა" → "131-ე საჯარო სკოლაში"
+    Returns phrase in locative case.
+    Fixed to protect formal multi-word titles like theaters and schools.
     """
     if not phrase: return phrase
+    # Special adverbs that are already locative
+    if phrase.lower().strip() in ('მანდ', 'იქ', 'აქ'):
+        return phrase
+
+    # --- FIX START: Protect formal venue names ---
+    # If the venue is a formal full name, we avoid the word-by-word stripping logic
+    formal_endings = ('თეატრი', 'სკოლა', 'ოპერა', 'დარბაზი')
+    if any(phrase.endswith(ending) for ending in formal_endings):
+        if phrase.endswith('თეატრი'):
+            return phrase[:-1] + 'ში'
+        if phrase.endswith('სკოლა'):
+            return phrase + 'ში'
+        if phrase.endswith('ოპერა'):
+            return phrase + 'ში'
+        if phrase.endswith('დარბაზი'):
+            return phrase[:-1] + 'ში'
+    # --- FIX END ---
+
     words = phrase.split()
-    # Each adjective (pure Georgian, ending ი, not last word): drop ი
+    # Adjectives preceding the head noun (pure Georgian, ending ი): drop ი
     for i in range(len(words) - 1):
         w = words[i]
-        if (re.match(r'^[\u10D0-\u10FF]+$', w)
-                and w.endswith('ი') and len(w) > 3):
+        if re.match(r'^[\u10D0-\u10FF]+$', w) and w.endswith('ი') and len(w) > 3:
             words[i] = w[:-1]
-    # Last word
+
+    # Last word (head noun)
     last = words[-1]
-    if last.endswith('ი'):
+    if last.endswith('ში'):
+        pass  # already locative
+    elif last.endswith('ი'):
         words[-1] = last[:-1] + 'ში'
     elif last.endswith('ა') or last.endswith('ო') or last.endswith('ე') or last.endswith('უ'):
         words[-1] = last + 'ში'
-    elif last.endswith('ში'):
-        pass  # already locative
     else:
         words[-1] = last + 'ში'
     return ' '.join(words)
+
+
+def _stop_genitive(raw: str) -> str:
+    """Clean stop name + convert to genitive. Use as 'X გაჩერება...' (space, no dash)."""
+    s = _expand_stop(_clean_stop(raw))
+    return _geo_genitive(s)
 
 
 # ── Core helpers ──────────────────────────────────────────────────────────────
@@ -201,10 +225,6 @@ def _expand_stop(s: str) -> str:
     s = re.sub(r'#(\d+)', r'\1', s)
     return s.strip(' "\'')
 
-def _stop_name(raw: str) -> str:
-    """Clean + expand a stop name."""
-    return _expand_stop(_clean_stop(raw))
-
 def _strip_promo(text: str) -> str:
     if not text: return ''
     sentences = re.split(r'(?<=[.!?])\s+', text)
@@ -212,14 +232,11 @@ def _strip_promo(text: str) -> str:
                     if not any(w.lower() in s.lower() for w in _PROMO_WORDS)).strip()
 
 def _strip_age_restriction(text: str) -> str:
-    """Remove generic child-ticket sentences; keep 18+/16+ warnings."""
-    if not text: return ''
-    def _keep(sentence: str) -> bool:
-        if _AGE_RESTRICT_RE.search(sentence):
-            return bool(re.search(r'18\+?|16\+?|სრულწლოვ', sentence))
+    def _keep(s: str) -> bool:
+        if _AGE_RESTRICT_RE.search(s):
+            return bool(re.search(r'18\+?|16\+?|სრულწლოვ', s))
         return True
-    parts = re.split(r'(?<=[.!?])\s+', text)
-    return ' '.join(p for p in parts if _keep(p)).strip()
+    return ' '.join(p for p in re.split(r'(?<=[.!?])\s+', text) if _keep(p)).strip()
 
 def _next_deps(schedule: list, count: int = 3) -> list:
     now = datetime.now(); h_now, m_now = now.hour, now.minute
@@ -260,12 +277,6 @@ def _unique_names(concerts: list) -> list:
         n = (c.get('name') or '').strip()
         if n and n not in seen: seen.add(n); names.append(n)
     return names
-
-def _walk_min(s: dict) -> int | None:
-    wm = s.get('walk_minutes')
-    if wm: return wm
-    dm = s.get('distance_m')
-    return round(dm / 80) if dm else None
 
 
 # ── Gemini ────────────────────────────────────────────────────────────────────
@@ -308,19 +319,31 @@ def _fetch_description(event: dict) -> dict:
     except Exception as e:
         log.warning('_desc_worker error: %s', e); return {'description':'','credits':''}
 
+def _normalize_venue_name(name: str) -> str:
+    """Ensure venue names are in their full, nominative form."""
+    if not name: return name
+    # Add common abbreviations or truncated names here to normalize them
+    replacements = {
+        "დუმბაძ სახელობის": "ნოდარ დუმბაძის სახელობის",
+        "მოზარდმაყურებელთა თეატრი": "ნოდარ დუმბაძის სახელობის მოზარდმაყურებელთა თეატრი"
+    }
+    for short, full in replacements.items():
+        if short in name and full not in name:
+            name = name.replace(short, full)
+    return name
+
 
 # ── Concert list ──────────────────────────────────────────────────────────────
 
 def _format_concert_list(concerts: list, category: str | None = None) -> tuple:
-    cat_label = _CATEGORY_LABEL.get(category, 'ღონისძიება') if category else 'ღონისძიება'
+    cat_label = _CATEGORY_LABEL.get(category,'ღონისძიება') if category else 'ღონისძიება'
     names = _unique_names(concerts)[:12]
     if not names:
         t = f'ახლო დღეებში {cat_label} ვერ მოიძებნა.'
         return t, t
     followup = 'გაინტერესებთ რომელიმე? შემიძლია გითხრათ სად და როდის ტარდება.'
-    numbered = '\n'.join(f'{i+1}. {n}' for i, n in enumerate(names))
+    numbered = '\n'.join(f'{i+1}. {n}' for i,n in enumerate(names))
     display = f'ვიპოვე {len(names)} {cat_label}:\n{numbered}\n\n{followup}'
-    # TTS: each name ends with period for pause
     tts = f'ვიპოვე {len(names)} {cat_label}. ' + '. '.join(names) + f'. {followup}'
     return display, tts
 
@@ -336,7 +359,8 @@ def _format_event_venue(events: list, event_name: str) -> tuple:
     if not venue or venue == 'N/A':
         t = f'"{name}"-ის ადგილი ვერ მოიძებნა.'
         return t, t
-    t = f'"{name}" {_geo_locative(venue)}-ში ტარდება.'
+    # _geo_locative already produces final form — NO extra -ში
+    t = f'"{name}" {_geo_locative(venue)} ტარდება.'
     return t, t
 
 def _format_event_dates(events: list, event_name: str) -> tuple:
@@ -361,13 +385,15 @@ def _format_event_dates(events: list, event_name: str) -> tuple:
         return t, t
 
     lines = []; spoken = []
-    for _, d_str, t_str in date_times:
+    for _, d_str, t_str in date_times[:10]:  # show up to 10 upcoming dates
         sd = _speakable_date(d_str); st = _speakable_time(t_str)
         entry = f'{sd}, {st}' if st else sd
         lines.append(entry); spoken.append(entry)
 
     numbered = '\n'.join(f'{i+1}. {l}' for i,l in enumerate(lines))
-    venue_note = f' {_geo_locative(venue)}' if venue and venue != 'N/A' else ''
+    # venue note — _geo_locative produces full form (no extra suffix)
+    venue_loc = _geo_locative(venue) if venue and venue != 'N/A' else ''
+    venue_note = f' {venue_loc}' if venue_loc else ''
     display = f'"{name}"{venue_note} ტარდება:\n{numbered}'
     tts     = f'"{name}"{venue_note} ტარდება: ' + '. '.join(spoken) + '.'
     return display, tts
@@ -401,7 +427,7 @@ def _format_event_detail(events: list, event_name: str,
     price_str = ''
     if price not in ('N/A','','გაყიდულია','უფასო'): price_str = f'ბილეთი: {price}'
     elif price == 'უფასო': price_str = 'შესვლა უფასოა'
-    venue_note = f'{_geo_locative(venue)}' if venue and venue != 'N/A' else ''
+    venue_loc  = _geo_locative(venue) if venue and venue != 'N/A' else ''
     dates_str  = '; '.join(date_lines) if date_lines else 'თარიღი უცნობია'
 
     desc_data   = _fetch_description(first)
@@ -419,20 +445,20 @@ def _format_event_detail(events: list, event_name: str,
         prompt = (
             f'შეადგინე მოკლე ქართული პასუხი ხმოვანი ასისტენტისთვის, '
             f'ოფიციალური სასაუბრო სტილით. მაქსიმუმ 4 წინადადება.\n\n'
-            f'"{name}", {venue_note}, სეანსები: {dates_str}. {price_str}.\n'
+            f'"{name}", {venue_loc}, სეანსები: {dates_str}. {price_str}.\n'
             f'{credits_note}\nაღწერა: {description[:300]}\n\n'
             f'წესები:\n- 4 წინადადება\n'
             f'- 1: სახელი (სრული), ადგილი (სრული), ახლო სეანსი, ფასი\n'
             f'- 2-3: მოკლე აღწერა\n'
             f'- ნუ ახსენებ ბანკს, ბარათს, ფასდაკლებას\n'
-            f'- ასაკობრივი შეზღუდვა მხოლოდ 18+ ან 16+ შემთხვევაში'
+            f'- ასაკობრივი შეზღუდვა მხოლოდ 18+ ან 16+'
         )
         result = _gemini(prompt)
         if result:
             return _strip_age_restriction(result), _strip_age_restriction(result)
 
     parts = [f'"{name}"']
-    if venue_note: parts.append(venue_note)
+    if venue_loc: parts.append(venue_loc)
     parts.append(f'სეანსები: {dates_str}.')
     if price_str: parts.append(price_str + '.')
     if description: parts.append(_strip_promo(description[:200]))
@@ -443,176 +469,190 @@ def _format_event_detail(events: list, event_name: str,
 
 # ── Route / directions ────────────────────────────────────────────────────────
 
-def _format_route(directions: dict, dest_label: str = '') -> tuple:
+def _format_route(directions: dict, dest_label: str = '',
+                  omit_times: bool = False) -> tuple:
     """
-    Natural Georgian transit directions.
-
-    Format:
-      [dest-ში მისასვლელად] ფეხით იარეთ X წუთი [first_stop]-ის გაჩერებამდე.
-      გაყევით N ავტობუსს [time]-ზე. [k] გაჩერება, ჩამოდით [arr_stop]-ის გაჩერებაზე.
-      [ფეხით X წუთი.]
-      სრული მგზავრობის დროა T.
+    Natural Georgian transit directions with numeric display and spoken TTS.
     """
-    steps       = directions.get('steps', [])
-    total       = directions.get('total_duration','')
+    steps = directions.get('steps', [])
+    total = directions.get('total_duration', '')
     has_transit = any(s.get('type') == 'transit' for s in steps)
+
+    # 1. FIXED: Pre-expand and normalize the label
+    full_dest = _normalize_venue_name(_expand_stop(dest_label)) if dest_label else ''
+
+    # Use the specific theater logic to prevent linguistic surgery
+    if "თეატრ" in full_dest:
+        dest_phrase = full_dest[:-1] + "ში" if full_dest.endswith('თეატრი') else f"{full_dest}ში"
+    else:
+        dest_phrase = _geo_locative(full_dest)
+
+    dest_prefix = f'{dest_phrase} მისასვლელად ' if full_dest else ''
 
     if not has_transit:
         walk_step = next((s for s in steps if s.get('type') == 'walking'), None)
-        dur = _expand_dur(walk_step.get('duration','') if walk_step else total)
-        dest_part = f'{_geo_locative(dest_label)}-ში მისასვლელად ' if dest_label else ''
-        t = f'{dest_part}ფეხით {dur} გჭირდებათ.'
+        dur = _expand_dur(walk_step.get('duration', '') if walk_step else total)
+        t = f'{dest_prefix}ფეხით {dur} გჭირდებათ.'
         return t, t
 
-    parts: list[str] = []
-
-    # Pre-compute: find first transit stop name for look-ahead
-    first_transit_stop = ''
-    for s in steps:
-        if s.get('type') == 'transit':
-            first_transit_stop = _stop_name(s.get('depart_stop',''))
-            break
+    # Lists for display and TTS
+    display_parts = []
+    tts_parts = []
 
     for i, s in enumerate(steps):
         stype = s.get('type')
 
         if stype == 'walking':
-            dur = _expand_dur(s.get('duration',''))
+            dur = _expand_dur(s.get('duration', ''))
             if not dur: continue
-            try:
-                dist_raw = s.get('distance','')
-                raw = float(re.sub(r'[^\d.]','', dist_raw.split()[0].replace(',','.')))
-                metres = raw*1000 if 'კმ' in dist_raw or 'km' in dist_raw.lower() else raw
-                if metres < 70: continue
-            except Exception: pass
 
-            # Look ahead: if next step is transit, mention its stop name
-            next_transit = None
-            for ns in steps[i+1:]:
+            # Logic for walking segments
+            next_stop = ''
+            for ns in steps[i + 1:]:
                 if ns.get('type') == 'transit':
-                    next_transit = _stop_name(ns.get('depart_stop',''))
+                    next_stop = _stop_genitive(ns.get('depart_stop', ''))
                     break
 
             if i == 0:
-                if next_transit:
-                    parts.append(f'ფეხით იარეთ {dur} {_geo_genitive(next_transit)}-ის გაჩერებამდე')
-                else:
-                    parts.append(f'ფეხით {dur}')
+                p = f'ფეხით იარეთ {dur} {next_stop + " " if next_stop else ""}გაჩერებამდე' if next_stop else f'ფეხით {dur}'
             else:
-                parts.append(f'გაიარეთ ფეხით {dur}')
+                p = f'გაიარეთ ფეხით {dur}'
+            display_parts.append(p)
+            tts_parts.append(p)
 
         elif stype == 'transit':
-            line    = s.get('line_name','')
-            dep_t   = s.get('departure_time','')
-            arr_s   = _stop_name(s.get('arrive_stop',''))
+            line = s.get('line_name', '')
+            dep_t = s.get('departure_time', '')
+            arr_s = _stop_genitive(s.get('arrive_stop', ''))
             n_stops = s.get('num_stops', 0)
 
-            # "გაყევით 305 ავტობუსს ორ საათზე"
-            p = f'გაყევით {line} ავტობუსს'
-            if dep_t: p += f' {_time_to_georgian(dep_t)}'
-            parts.append(p)
+            # --- DUAL FORMATTING START ---
+            p_display = f'გაყევით {line} ავტობუსს'
+            p_tts = f'გაყევით {line} ავტობუსს'
 
-            # "იმგზავრეთ N გაჩერება, ჩამოდით X-ის გაჩერებაზე"
+            if dep_t and not omit_times:
+                # Add HH:MM for display, spoken time for TTS
+                p_display += f' {dep_t} საათზე'
+                p_tts += f' {_time_to_georgian(dep_t)}'
+
+            display_parts.append(p_display)
+            tts_parts.append(p_tts)
+            # --- DUAL FORMATTING END ---
+
             if n_stops or arr_s:
                 q = ''
                 if n_stops: q += f'იმგზავრეთ {n_stops} გაჩერება'
-                if arr_s:
-                    arr_gen = _geo_genitive(arr_s)
-                    if q: q += f', ჩამოდით {arr_gen}-ის გაჩერებაზე'
-                    else: q = f'ჩამოდით {arr_gen}-ის გაჩერებაზე'
-                parts.append(q)
+                if arr_s: q += (', ' if q else '') + f'ჩამოდით {arr_s} გაჩერებაზე'
+                if q:
+                    display_parts.append(q)
+                    tts_parts.append(q)
 
-    if not parts:
+    if not display_parts:
         t = 'მარშრუტი ვერ მოიძებნა.'
         return t, t
 
     total_part = f'სრული მგზავრობის დროა {_expand_dur(total)}.' if total else ''
 
-    # Prefix with destination
-    dest_prefix = f'{_geo_locative(dest_label)}-ში მისასვლელად ' if dest_label else ''
-    text = dest_prefix + '. '.join(parts) + '. ' + total_part
-    text = text.rstrip('. ').rstrip() + ('.' if total_part else '.')
-    text = re.sub(r'\.\s*\.', '.', text)  # clean double dots
-    return text, text
+    # Final construction
+    text_display = (dest_prefix + '. '.join(display_parts) + '. ' + total_part).replace('..', '.').strip()
+    text_tts = (dest_prefix + '. '.join(tts_parts) + '. ' + total_part).replace('..', '.').strip()
 
+    return text_display.rstrip(' .') + '.', text_tts.rstrip(' .') + '.'
 
 # ── Bus ───────────────────────────────────────────────────────────────────────
 
-def _format_buses_at_named_place(place: str, schedules: list) -> tuple:
-    """All buses arriving at a named place within reasonable time."""
+def _format_buses_at_named_place(place: str, schedules: list,
+                                  use_minutes: bool = False) -> tuple:
+    """All upcoming buses at a named place."""
     if not schedules:
-        t = f'{place}-სთან ახლომდებარე ავტობუსი ვერ მოიძებნა.'
+        t = f'{_geo_locative(place)} ახლომდებარე ავტობუსი ვერ მოიძებნა.'
         return t, t
     now_mins = datetime.now().hour * 60 + datetime.now().minute
     parts = []
-    for s in schedules[:8]:
+    for s in schedules[:10]:
         r   = s.get('route_number','')
         dep = s.get('departure_time','')
         if not r or not dep: continue
-        # Parse dep time → minutes
         try:
-            h, m = map(int, dep.split(':'))
-            diff = h*60 + m - now_mins
-            if diff < 0 or diff > 30: continue  # only within 30 min
+            h, m   = map(int, dep.split(':'))
+            diff   = h*60 + m - now_mins
+            if diff < 0 or diff > 60: continue
+            if use_minutes:
+                parts.append(f'{r}-ე ავტობუსი {diff} წუთში')
+            else:
+                parts.append(f'{r}-ე ავტობუსი {_time_to_georgian(dep)}')
         except Exception: pass
-        parts.append(f'{r}-ე ავტობუსი {_time_to_georgian(dep)}')
     if not parts:
-        # Fallback: just list the first few regardless
         for s in schedules[:5]:
-            r = s.get('route_number','')
-            dep = s.get('departure_time','')
+            r = s.get('route_number',''); dep = s.get('departure_time','')
             if r and dep: parts.append(f'{r}-ე ავტობუსი {_time_to_georgian(dep)}')
     if not parts:
-        t = f'{place}-სთან ახლომდებარე ავტობუსი ვერ მოიძებნა.'
+        t = f'{_geo_locative(place)} ახლომდებარე ავტობუსი ვერ მოიძებნა.'
         return t, t
-    loc = _geo_locative(place)
-    t = f'{loc} ახლოს: ' + '. '.join(parts) + '.'
+    t = f'{_geo_locative(place)}: ' + '. '.join(parts) + '.'
     return t, t
 
-def _format_route_bus_at_named_place(route_number: str, place: str, schedules: list) -> tuple:
-    """When does specific route arrive at a named place."""
+
+def _format_route_bus_at_named_place(route_number: str, place: str, schedules: list,
+                                     use_minutes: bool = False) -> tuple:
     if not schedules:
-        t = f'{route_number}-ე ავტობუსი {_geo_locative(place)}-სთან ვერ მოიძებნა.'
+        t = f'{route_number} ავტობუსი {place}-თან ვერ მოიძებნა.'
         return t, t
-    s    = schedules[0]
-    stop = _stop_name(s.get('name') or s.get('stop_name') or s.get('depart_stop') or '')
-    dep  = s.get('departure_time','')
-    loc  = _geo_locative(place)
-    if dep and stop:
-        stop_gen = _geo_genitive(stop)
-        t = f'{route_number}-ე ავტობუსი {loc}-სთან {stop_gen}-ის გაჩერებაზე {_time_to_georgian(dep)} მოვა.'
-    elif dep:
-        t = f'{route_number}-ე ავტობუსი {loc}-სთან {_time_to_georgian(dep)} მოვა.'
-    else:
-        t = f'{route_number}-ე ავტობუსი {loc}-სთან — ინფორმაცია ვერ მოიძებნა.'
-    return t, t
 
-def _format_bus_at_nearest(route_number: str, stops: list, gps_stops=None) -> tuple:
+    s = schedules[0]
+    dep = s.get('departure_time', '')
+
+    if dep:
+        mins = _mins_until(dep)
+        if use_minutes and mins is not None:
+            display_text = f'{route_number} ავტობუსი მოვა {mins} წუთში.'
+            tts_text = f'{route_number} ავტობუსი მოვა {_number_to_georgian(mins)} წუთში.'
+        else:
+            text = f'{route_number} ავტობუსი მოვა {_time_to_georgian(dep)}.'
+            return text, text
+    else:
+        t = f'{route_number} ავტობუსის გრაფიკი ვერ მოიძებნა.'
+        return t, t
+
+    return display_text, tts_text
+
+def _format_bus_at_nearest(route_number: str, stops: list, gps_stops=None,
+                             use_minutes: bool = False) -> tuple:
     if gps_stops:
         route_gps = [s for s in gps_stops if str(s.get('route_number','')) == str(route_number)]
         if route_gps:
-            s = route_gps[0]
-            stop  = _stop_name(s.get('name') or s.get('stop_name') or '')
-            wm    = _walk_min(s)
+            s     = route_gps[0]
+            stop  = _expand_stop(_clean_stop(s.get('name') or s.get('stop_name') or ''))
+            stop_gen = _geo_genitive(stop) if stop else ''
+            wm    = s.get('walk_minutes') or (round(s['distance_m']/80) if s.get('distance_m') else None)
             dep   = s.get('departure_time','')
             walk  = f' გაჩერებამდე {wm} წუთის სავალია.' if wm else '.'
-            if dep and stop:
-                t = f'{route_number}-ე ავტობუსი {_time_to_georgian(dep)} მოვა {_geo_genitive(stop)}-ის გაჩერებაზე.{walk}'
-            elif dep:
-                t = f'{route_number}-ე ავტობუსი {_time_to_georgian(dep)} მოვა.{walk}'
+            if dep:
+                mins = _mins_until(dep)
+                if use_minutes and mins is not None:
+                    time_str = f'{mins} წუთში'
+                else:
+                    time_str = _time_to_georgian(dep)
+                # _geo_genitive already returns genitive — SPACE before გაჩერება, no dash
+                if stop_gen:
+                    t = f'{route_number}-ე ავტობუსი {time_str} მოვა {stop_gen} გაჩერებაზე.{walk}'
+                else:
+                    t = f'{route_number}-ე ავტობუსი {time_str} მოვა.{walk}'
             else:
-                t = f'{route_number}-ე ავტობუსი {_geo_genitive(stop)}-ის გაჩერებაზე გაივლის.{walk}'
+                t = f'{route_number}-ე ავტობუსი {stop_gen} გაჩერებაზე გაივლის.{walk}'
             return t, t
 
     if not stops:
         t = (f'{route_number}-ე მარშრუტის ინფორმაცია ვერ მოიძებნა. '
              f'ხელმისაწვდომია: 299, 300, 301, 302, 305, 307, 312, 314, 315, 320.')
         return t, t
-    stop = stops[0]; name = _stop_name(stop['name'])
-    deps = _next_deps(stop['schedule'], count=2)
+    stop  = stops[0]
+    name  = _expand_stop(_clean_stop(stop['name']))
+    name_gen = _geo_genitive(name)
+    deps  = _next_deps(stop['schedule'], count=2)
     if deps:
         times = ' და '.join(_dep_spoken(h,m) for h,m in deps)
-        t = f'{route_number}-ე ავტობუსი {_geo_genitive(name)}-ის გაჩერებაზე {times} მოვა.'
+        t = f'{route_number}-ე ავტობუსი {name_gen} გაჩერებაზე {times} მოვა.'
     else:
         t = f'{route_number}-ე ავტობუსი "{name}" — დღის ბოლო რეისი გავიდა.'
     return t, t
@@ -624,52 +664,47 @@ def _format_bus(route_number: str, stops: list) -> tuple:
         return t, t
     parts = []
     for stop in stops[:2]:
-        name = _stop_name(stop['name'])
-        deps = _next_deps(stop['schedule'], count=2)
+        name     = _expand_stop(_clean_stop(stop['name']))
+        name_gen = _geo_genitive(name)
+        deps     = _next_deps(stop['schedule'], count=2)
         if deps:
             times = ', '.join(_dep_spoken(h,m) for h,m in deps)
-            parts.append(f'{name}: {times}')
+            parts.append(f'{name_gen} გაჩერება: {times}')
         else:
-            parts.append(f'{name} — ბოლო რეისი')
+            parts.append(f'"{name}" — ბოლო რეისი')
     t = f'{route_number}-ე მარშრუტი. ' + '. '.join(parts) + '.'
-    return t, t
-
-def _format_buses_at_place(place: str, results: list) -> tuple:
-    if not results:
-        t = f'"{place}"-სთან გამავალი ავტობუსი ვერ მოიძებნა.'
-        return t, t
-    routes = sorted({r['route_number'] for r in results})
-    t = f'"{place}"-სთან გაივლის: {", ".join(f"{r}-ე" for r in routes)} მარშრუტი.'
     return t, t
 
 
 # ── Nearest stops / buses ─────────────────────────────────────────────────────
 
-def _format_nearest(stops: list) -> tuple:
-    """Nearest buses with departure time and stop name."""
+def _format_nearest(stops: list, use_minutes: bool = False) -> tuple:
     if not stops:
         t = 'ახლომდებარე ავტობუსი ვერ მოიძებნა.'
         return t, t
     parts = []
     for s in stops[:5]:
-        r     = s.get('route_number','')
-        dep   = s.get('departure_time','')
-        wm    = _walk_min(s)
-        raw   = s.get('name') or s.get('stop_name') or s.get('depart_stop') or ''
-        stop  = _stop_name(raw)
-        # Format: "305 ავტობუსი X-ზე მოვა Y-ის გაჩერებაზე. ეს გაჩერება Z წუთის სავალზეა."
-        if r and dep and stop:
-            stop_gen = _geo_genitive(stop)
-            walk_part = f' ეს გაჩერება {wm} წუთის სავალზეა' if wm else ''
-            parts.append(
-                f'{r} ავტობუსი {_time_to_georgian(dep)} მოვა {stop_gen}-ის გაჩერებაზე.{walk_part}'
-            )
+        r         = s.get('route_number','')
+        dep       = s.get('departure_time','')
+        wm        = s.get('walk_minutes') or (round(s['distance_m']/80) if s.get('distance_m') else None)
+        raw_name  = s.get('name') or s.get('stop_name') or s.get('depart_stop') or ''
+        stop_gen  = _geo_genitive(_expand_stop(_clean_stop(raw_name)))
+        walk_sfx  = f' ეს გაჩერება {wm} წუთის სავალზეა.' if wm else ''
+
+        if r and dep and stop_gen:
+            if use_minutes:
+                mins = _mins_until(dep)
+                t_str = f'{mins} წუთში' if mins is not None else _time_to_georgian(dep)
+            else:
+                t_str = _time_to_georgian(dep)
+            # stop_gen already genitive — SPACE before გაჩერება
+            parts.append(f'{r} ავტობუსი {t_str} მოვა {stop_gen} გაჩერებაზე.{walk_sfx}')
         elif r and dep:
-            walk_part = f', {wm} წუთის სავალი' if wm else ''
-            parts.append(f'{r} ავტობუსი {_time_to_georgian(dep)}{walk_part}')
+            t_str = _time_to_georgian(dep)
+            walk_sfx2 = f' {wm} წუთის სავალია' if wm else ''
+            parts.append(f'{r} ავტობუსი {t_str}.{walk_sfx2}')
         elif r:
-            walk_part = f', {wm} წუთის სავალი' if wm else ''
-            parts.append(f'{r} მარშრუტი{walk_part}')
+            parts.append(f'{r} მარშრუტი')
     if not parts:
         t = 'ახლომდებარე ავტობუსი ვერ მოიძებნა.'
         return t, t
@@ -677,13 +712,12 @@ def _format_nearest(stops: list) -> tuple:
     return t, t
 
 def _format_nearest_stops(stops: list) -> tuple:
-    """Stop names with walking time — no buses."""
     if not stops:
         t = 'ახლომდებარე გაჩერება ვერ მოიძებნა.'
         return t, t
     seen = {}
     for s in stops:
-        name = _stop_name(s.get('name') or s.get('stop_name') or '')
+        name = _expand_stop(_clean_stop(s.get('name') or s.get('stop_name') or ''))
         dist = s.get('distance_m') or 9999
         if name and name not in seen: seen[name] = dist
     lines = []
@@ -723,10 +757,6 @@ def _format_home_route(results: list, home_address: str = '', directions=None) -
 # ── Arrival planning ──────────────────────────────────────────────────────────
 
 def _format_arrival_planning(intent, directions) -> tuple:
-    """
-    User asked 'when do I leave to arrive at X by HH:MM'.
-    Formats departure time, full route, then arrival time.
-    """
     arrival_time   = intent.specific_date or ''
     place          = intent.place or 'ადგილი'
     arrival_spoken = _time_to_georgian(arrival_time) if arrival_time else ''
@@ -735,15 +765,15 @@ def _format_arrival_planning(intent, directions) -> tuple:
     if directions and directions.get('steps'):
         dep_time = directions.get('departure_time','')
         arr_time = directions.get('arrival_time','')
-        total    = directions.get('total_duration','')
-        route_text, _ = _format_route(directions, '')
+        route_text, _ = _format_route(directions, '', omit_times=False)
 
-        # "იმისათვის რომ X-ში მიხვიდეთ Y-ზე, სახლიდან უნდა გახვიდეთ Z-ზე."
         if dep_time and arrival_spoken:
+            dep_sp = _time_to_georgian(dep_time) if ':' in dep_time else dep_time
             prefix = (f'იმისათვის, რომ {place_loc} მიხვიდეთ {arrival_spoken}, '
-                      f'სახლიდან უნდა გახვიდეთ {dep_time}-ზე. ')
+                      f'სახლიდან უნდა გახვიდეთ {dep_sp}. ')
         elif dep_time:
-            prefix = f'{dep_time}-ზე გამოდით. '
+            dep_sp = _time_to_georgian(dep_time) if ':' in dep_time else dep_time
+            prefix = f'{dep_sp}-ზე გამოდით. '
         else:
             prefix = ''
 
@@ -751,7 +781,8 @@ def _format_arrival_planning(intent, directions) -> tuple:
         if arr_time:
             arr_suffix = f' დანიშნულების ადგილზე იქნებით {_time_to_georgian(arr_time)}.'
 
-        t = prefix + route_text.rstrip('.') + arr_suffix
+        t = prefix + route_text.rstrip('.') + arr_suffix + '.'
+        t = re.sub(r'\.\s*\.', '.', t)
         return t, t
 
     if arrival_spoken:
@@ -765,9 +796,10 @@ def _format_arrival_planning(intent, directions) -> tuple:
 
 def _format_event_with_route(events: list, event_name: str,
                               directions=None) -> tuple:
+    """Show event dates, then route to venue (no departure times in route)."""
     date_disp, date_tts = _format_event_dates(events, event_name)
     if directions and directions.get('steps'):
-        route_text, _ = _format_route(directions, '')
+        route_text, _ = _format_route(directions, '', omit_times=True)
         display = f'{date_disp}\n\nმისასვლელი გზა: {route_text}'
         tts     = f'{date_tts} {route_text}'
     else:
@@ -786,24 +818,23 @@ def _format_unknown() -> tuple:
 
 # ── build_response ────────────────────────────────────────────────────────────
 
-def build_response(intent: IntentResult, results: list,
-                   venue_bus_offer=None, home_address='',
+def build_response(intent, results, venue_bus_offer=None, home_address='',
                    event_detail=None, directions=None,
-                   extra_context: dict | None = None) -> dict:
+                   extra_context: dict | None = None,
+                   dest_label: str | None = None) -> dict:
     display, tts = '', ''
     ctx = extra_context or {}
+    use_minutes = ctx.get('use_minutes', False)
 
     if intent.intent == 'bus_search':
         if ctx.get('buses_at_named_place'):
-            display, tts = _format_buses_at_named_place(intent.place or '', results)
+            display, tts = _format_buses_at_named_place(intent.place or '', results, use_minutes=use_minutes)
         elif ctx.get('bus_at_named_place'):
-            display, tts = _format_route_bus_at_named_place(
-                intent.route or '?', intent.place or '', results)
-        elif ctx.get('buses_at_place'):
-            display, tts = _format_buses_at_place(intent.place or intent.venue or '', results)
+            display, tts = _format_route_bus_at_named_place(intent.route or '?', intent.place or '', results,
+                                                            use_minutes=use_minutes)
         elif ctx.get('nearest_for_route'):
-            display, tts = _format_bus_at_nearest(
-                intent.route or '?', results, gps_stops=ctx.get('gps_stops'))
+            display, tts = _format_bus_at_nearest(intent.route or '?', results, gps_stops=ctx.get('gps_stops'),
+                                                  use_minutes=use_minutes)
         else:
             display, tts = _format_bus(intent.route or '?', results)
 
@@ -812,45 +843,45 @@ def build_response(intent: IntentResult, results: list,
             category = results[0].get('category') if results else None
             display, tts = _format_concert_list(results, category)
         else:
-            cat_label  = _CATEGORY_LABEL.get(intent.category,'ღონისძიება') if intent.category else 'ღონისძიება'
+            cat_label = _CATEGORY_LABEL.get(intent.category, 'ღონისძიება') if intent.category else 'ღონისძიება'
             venue_note = f' {intent.venue}-ში' if intent.venue else ''
-            date_note  = f' {intent.specific_date}-ს' if intent.specific_date else ''
+            date_note = f' {intent.specific_date}-ს' if intent.specific_date else ''
             t = f'ახლო დღეებში{venue_note}{date_note} {cat_label} ვერ მოიძებნა.'
             display, tts = t, t
 
     elif intent.intent == 'journey_search':
         if directions and directions.get('steps'):
-            display, tts = _format_route(directions, intent.place or '')
+            label_to_use = _expand_stop(dest_label) if dest_label else (intent.place or '')
+            display, tts = _format_route(directions, dest_label=label_to_use)
         elif results:
             routes = list({r['route_number'] for r in results})
-            place  = intent.place or 'ადგილი'
-            t = f'{place}-სთან მიმავალი მარშრუტები: {", ".join(routes[:5])}.'
+            t = f'{intent.place or "ადგილი"}-სთან მიმავალი მარშრუტები: {", ".join(routes[:5])}.'
             display, tts = t, t
         else:
-            t = 'ამ ადგილთან მიმავალი ავტობუსი ვერ მოიძებნა.'
-            display, tts = t, t
+            display, tts = 'ამ ადგილთან მიმავალი ავტობუსი ვერ მოიძებნა.', \
+                'ამ ადგილთან მიმავალი ავტობუსი ვერ მოიძებნა.'
 
     elif intent.intent == 'home_route':
         display, tts = _format_home_route(results, home_address, directions)
 
     elif intent.intent == 'event_detail':
-        evs  = (event_detail if isinstance(event_detail, list)
-                else ([event_detail] if event_detail else []))
-        orig = ctx.get('original_text','').lower()
+        evs = (event_detail if isinstance(event_detail, list)
+               else ([event_detail] if event_detail else []))
+        orig = ctx.get('original_text', '').lower()
         if ctx.get('event_with_route'):
             display, tts = _format_event_with_route(evs, intent.event_name or '',
-                                                     directions=directions)
+                                                    directions=directions)
         else:
             venue_only = ctx.get('venue_only', False) or any(
-                kw in orig for kw in ['სად ტარდება','სად იმართება','სად არის','სად გაიმართება'])
+                kw in orig for kw in ['სად ტარდება', 'სად იმართება', 'სად არის', 'სად გაიმართება'])
             dates_only = ctx.get('dates_only', False) or (not venue_only and any(
-                kw in orig for kw in ['რა დღეებ','რომელ დღეებ','სეანს','კვირ','განმავლობ',
-                                       'გრაფიკ','განრიგ','როდის ტარდება','როდის არის',
-                                       'როდის გაიმართება','როდის იქნება']))
+                kw in orig for kw in ['რა დღეებ', 'რომელ დღეებ', 'სეანს', 'კვირ', 'განმავლობ',
+                                      'გრაფიკ', 'განრიგ', 'როდის ტარდება', 'როდის არის',
+                                      'როდის გაიმართება', 'როდის იქნება', 'როდის არის']))
             display, tts = _format_event_detail(
                 evs, intent.event_name or '',
                 dates_only=dates_only, venue_only=venue_only,
-                context_date=ctx.get('context_date',''),
+                context_date=ctx.get('context_date', ''),
                 user_query=orig,
             )
 
@@ -858,18 +889,55 @@ def build_response(intent: IntentResult, results: list,
         if ctx.get('stops_only'):
             display, tts = _format_nearest_stops(results or [])
         else:
-            display, tts = _format_nearest(results or [])
+            display, tts = _format_nearest(results or [], use_minutes=use_minutes)
 
     elif intent.intent == 'arrival_planning':
         display, tts = _format_arrival_planning(intent, directions)
 
     elif intent.intent == 'save_home_location':
         display = 'სახლის მისამართი შეინახა.'
-        tts     = display
+        tts = display
 
     else:
         display, tts = _format_unknown()
 
     display = _strip_promo(display or '')
-    tts     = _strip_promo(tts or '')
+    tts = _strip_promo(tts or '')
+
+    # Apply the global TTS number-to-word conversion
+    if not tts:
+        tts = _create_tts_from_text(display)
+
     return {'response_text': display, 'tts_text': tts}
+
+
+def _number_to_georgian(n: int) -> str:
+    """Converts integers to Georgian words."""
+    if n < 0: return str(n)
+    if n == 0: return "ნულ"
+
+    units = ["", "ერთ", "ორ", "სამ", "ოთხ", "ხუთ", "ექვს", "შვიდ", "რვა", "ცხრა", "ათ",
+             "თერთმეტ", "თორმეტ", "ცამეტ", "თოთხმეტ", "თხუთმეტ", "თექვსმეტ", "ჩვიდმეტ",
+             "თვრამეტ", "ცხრამეტ"]
+    tens = ["", "ათ", "ოც", "ოცდაათ", "ორმოც", "ორმოცდაათ", "სამოც", "სამოცდაათ", "ოთხმოც", "ოთხმოცდაათ"]
+
+    if n < 20: return units[n]
+    if n < 100:
+        ten = n // 20
+        rem = n % 20
+        res = tens[ten * 2] if ten % 2 == 0 else tens[ten]
+        # Simplification for basic cases (e.g., 25 -> ოცდახუთ)
+        if rem == 0: return res + "ი" if ten % 2 == 0 else res + "ათი"
+        return res + ("და" if ten % 2 == 0 else "და") + units[rem]
+    return str(n)  # Fallback for very large numbers
+
+
+def _create_tts_from_text(text: str) -> str:
+    """Finds numbers in the text and converts them to words for TTS."""
+
+    def replacer(match):
+        num = int(match.group(0))
+        return _number_to_georgian(num)
+
+    # This regex finds sequences of digits
+    return re.sub(r'\d+', replacer, text)
