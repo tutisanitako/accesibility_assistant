@@ -27,10 +27,11 @@ class Concert(BaseModel):
 
 class QueryRequest(BaseModel):
     text: str
-    # Optional GPS — frontend sends these when available so journey search works
-    lat: Optional[float] = None
+    lat: Optional[float] = None        # current GPS
     lng: Optional[float] = None
     context_date: Optional[str] = None
+    home_lat: Optional[float] = None   # saved home coords — sent by frontend
+    home_lng: Optional[float] = None
 
 class QueryResponse(BaseModel):
     intent: str
@@ -38,7 +39,7 @@ class QueryResponse(BaseModel):
     tts_text: str = ''
     results: list[dict]
     venue_bus_offer: Optional[str] = None
-    directions: Optional[dict] = None   # Google Maps directions if available
+    directions: Optional[dict] = None
 
 class SynthesizeRequest(BaseModel):
     text: str

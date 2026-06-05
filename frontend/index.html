@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>როგორ შემიძლია დავეხმაროთ?</title>
+<title>თბილისის ასისტენტი</title>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#FAFAFC"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -26,267 +26,99 @@
   --white:#ffffff;
   --red:#C0392B;
 }
-html,body{
-  height:100%;overflow:hidden;
-  background:var(--bg);font-family:'Noto Sans Georgian',sans-serif;color:var(--text-main);
-}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'Noto Sans Georgian',sans-serif;color:var(--text-main);}
 body{display:flex;flex-direction:column;}
 
 /* ── HEADER ── */
-.header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 28px;height:68px;flex-shrink:0;
-  background:var(--white);border-bottom:1px solid var(--border);
-  z-index:100;
-}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 28px;height:68px;flex-shrink:0;background:var(--white);border-bottom:1px solid var(--border);z-index:100;}
 .header-left{display:flex;align-items:center;gap:16px;}
-.header-mic-icon{
-  width:44px;height:44px;border-radius:50%;
-  background:var(--navy);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  box-shadow:0 0 0 5px rgba(3,45,143,0.08);
-}
+.header-mic-icon{width:44px;height:44px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 0 5px rgba(3,45,143,0.08);}
 .header-mic-icon svg{width:20px;height:20px;fill:white;}
 .header-title{font-size:20px;font-weight:700;color:var(--navy-dark);line-height:1.2;}
 .header-sub{font-size:13px;font-weight:400;color:var(--text-muted);margin-top:1px;}
 .header-right{display:flex;gap:10px;align-items:center;}
-.hist-btn{
-  display:flex;align-items:center;gap:8px;
-  height:42px;padding:0 18px;
-  border:1px solid #DCE3F0;border-radius:12px;
-  background:var(--white);cursor:pointer;
-  font-family:'Noto Sans Georgian',sans-serif;
-  font-size:14px;font-weight:500;color:var(--text-main);
-  transition:border-color 0.15s,background 0.15s;
-}
+.hist-btn{display:flex;align-items:center;gap:8px;height:42px;padding:0 18px;border:1px solid #DCE3F0;border-radius:12px;background:var(--white);cursor:pointer;font-family:'Noto Sans Georgian',sans-serif;font-size:14px;font-weight:500;color:var(--text-main);transition:border-color 0.15s,background 0.15s;}
 .hist-btn:hover{background:var(--blue-pale);border-color:#b8c8ee;}
 .hist-btn svg{width:17px;height:17px;fill:none;stroke:var(--text-muted);stroke-width:2;}
-.home-btn{
-  display:flex;align-items:center;gap:8px;
-  height:42px;padding:0 16px;
-  border:1px solid #DCE3F0;border-radius:12px;
-  background:var(--white);cursor:pointer;
-  font-family:'Noto Sans Georgian',sans-serif;
-  font-size:14px;font-weight:500;color:var(--text-muted);
-  transition:all 0.15s;
-}
+.home-btn{display:flex;align-items:center;gap:8px;height:42px;padding:0 16px;border:1px solid #DCE3F0;border-radius:12px;background:var(--white);cursor:pointer;font-family:'Noto Sans Georgian',sans-serif;font-size:14px;font-weight:500;color:var(--text-muted);transition:all 0.15s;}
 .home-btn:hover{background:var(--blue-pale);}
 .home-btn.saved{color:var(--blue);border-color:#b8c8ee;}
 .home-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;}
 
 /* ── MAIN LAYOUT ── */
-.page-body{
-  flex:1;min-height:0;overflow:hidden;
-  display:flex;align-items:stretch;justify-content:center;
-  padding:14px 18px 76px;
-}
+.page-body{flex:1;min-height:0;overflow:hidden;display:flex;align-items:stretch;justify-content:center;padding:14px 18px 76px;}
 
-/* ── CARD WRAPPER ── */
-.main-card{
-  width:100%;max-width:820px;
-  background:var(--white);
-  border:1px solid var(--border);
-  border-radius:22px;
-  padding:18px 22px 14px;
-  display:flex;flex-direction:column;align-items:center;
-  overflow:hidden;
-  min-height:0;
-}
+/* ── CARD ── */
+.main-card{width:100%;max-width:820px;background:var(--white);border:1px solid var(--border);border-radius:22px;padding:18px 22px 14px;display:flex;flex-direction:column;align-items:center;overflow:hidden;min-height:0;}
 
-/* ── BIG MIC ── */
+/* ── MIC ── */
 .mic-section{display:flex;flex-direction:column;align-items:center;margin-bottom:14px;flex-shrink:0;}
-.mic-glow-ring{
-  width:200px;height:200px;border-radius:50%;
-  background:radial-gradient(circle,rgba(91,141,238,0.12) 0%,rgba(91,141,238,0.04) 60%,transparent 100%);
-  display:flex;align-items:center;justify-content:center;
-  position:relative;
-}
-.mic-glow-ring::before{
-  content:'';position:absolute;
-  width:200px;height:200px;border-radius:50%;
-  border:2px solid rgba(3,45,143,0.08);
-}
-#big-mic-btn{
-  width:150px;height:150px;border-radius:50%;border:none;cursor:pointer;
-  background:radial-gradient(circle at 38% 35%, #1a56db 0%, #032D8F 55%, #021e6b 100%);
-  box-shadow:0 6px 24px rgba(3,45,143,0.35),0 2px 6px rgba(3,45,143,0.2);
-  display:flex;align-items:center;justify-content:center;
-  transition:transform 0.15s,box-shadow 0.15s;
-  outline:none;-webkit-tap-highlight-color:transparent;
-  position:relative;z-index:1;
-}
+.mic-glow-ring{width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(91,141,238,0.12) 0%,rgba(91,141,238,0.04) 60%,transparent 100%);display:flex;align-items:center;justify-content:center;position:relative;}
+.mic-glow-ring::before{content:'';position:absolute;width:200px;height:200px;border-radius:50%;border:2px solid rgba(3,45,143,0.08);}
+#big-mic-btn{width:150px;height:150px;border-radius:50%;border:none;cursor:pointer;background:radial-gradient(circle at 38% 35%, #1a56db 0%, #032D8F 55%, #021e6b 100%);box-shadow:0 6px 24px rgba(3,45,143,0.35),0 2px 6px rgba(3,45,143,0.2);display:flex;align-items:center;justify-content:center;transition:transform 0.15s,box-shadow 0.15s;outline:none;-webkit-tap-highlight-color:transparent;position:relative;z-index:1;}
 #big-mic-btn:hover{transform:scale(1.03);box-shadow:0 10px 32px rgba(3,45,143,0.4);}
 #big-mic-btn:active{transform:scale(0.97);}
 #big-mic-btn svg{width:60px;height:60px;fill:white;}
-#big-mic-btn.recording{
-  background:radial-gradient(circle at 38% 35%,#e05c6a 0%,#b02030 55%,#7a0e1a 100%);
-  box-shadow:0 6px 24px rgba(224,92,106,0.45);
-  animation:recPulse 1.5s ease-in-out infinite;
-}
+#big-mic-btn.recording{background:radial-gradient(circle at 38% 35%,#e05c6a 0%,#b02030 55%,#7a0e1a 100%);box-shadow:0 6px 24px rgba(224,92,106,0.45);animation:recPulse 1.5s ease-in-out infinite;}
 @keyframes recPulse{0%,100%{box-shadow:0 6px 24px rgba(224,92,106,0.45),0 0 0 0 rgba(224,92,106,0.3);}50%{box-shadow:0 6px 24px rgba(224,92,106,0.45),0 0 0 18px rgba(224,92,106,0);}}
-.mic-label{
-  margin-top:12px;font-size:17px;font-weight:600;
-  color:var(--navy-dark);text-align:center;
-}
+.mic-label{margin-top:12px;font-size:17px;font-weight:600;color:var(--navy-dark);text-align:center;}
 .mic-label.recording-text{color:#c0392b;}
 
 /* ── CONVERSATION ── */
-.convo-section{
-  width:100%;flex:1;/* grows to fill remaining card height */
-  min-height:0;/* important: lets flex child shrink below content size */
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:16px;
-  display:flex;flex-direction:column;gap:16px;
-  overflow-y:auto;
-  background:var(--bg);
-  scroll-behavior:smooth;
-}
+.convo-section{width:100%;flex:1;min-height:0;border:1px solid var(--border);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;background:var(--bg);scroll-behavior:smooth;}
 .convo-section::-webkit-scrollbar{width:4px;}
 .convo-section::-webkit-scrollbar-track{background:transparent;}
 .convo-section::-webkit-scrollbar-thumb{background:#d0d8ee;border-radius:4px;}
 
-/* Message rows */
+/* Messages */
 .msg-row{display:flex;align-items:flex-end;gap:10px;}
 .msg-row.user{flex-direction:row-reverse;}
-
-.bot-av{
-  width:38px;height:38px;border-radius:50%;
-  background:var(--navy);flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:2px;
-}
+.bot-av{width:38px;height:38px;border-radius:50%;background:var(--navy);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-bottom:2px;}
 .bot-av svg{width:18px;height:18px;fill:white;}
-.user-av{
-  width:34px;height:34px;border-radius:50%;
-  background:#dde6ff;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:2px;
-}
+.user-av{width:34px;height:34px;border-radius:50%;background:#dde6ff;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-bottom:2px;}
 .user-av svg{width:16px;height:16px;fill:none;stroke:var(--navy);stroke-width:2;}
-
 .bwrap{display:flex;flex-direction:column;max-width:75%;gap:3px;}
 .msg-row.user .bwrap{align-items:flex-end;}
 .msg-row.bot  .bwrap{align-items:flex-start;}
-
-.bubble{
-  padding:12px 16px;border-radius:18px;
-  font-size:17px;line-height:1.55;word-break:break-word;
-}
+.bubble{padding:12px 16px;border-radius:18px;font-size:17px;line-height:1.55;word-break:break-word;white-space:pre-wrap;}
 .msg-row.bot  .bubble{background:#F5F7FC;color:var(--text-main);border-bottom-left-radius:4px;}
 .msg-row.user .bubble{background:var(--blue-light);color:var(--text-main);border-bottom-right-radius:4px;}
 .msg-time{font-size:11px;color:var(--text-light);padding:0 3px;}
 
-/* typing dots */
-.typing-bubble{
-  background:#F5F7FC;border-radius:20px;border-bottom-left-radius:5px;
-  padding:18px 22px;display:flex;align-items:center;gap:6px;
-}
+/* Typing */
+.typing-bubble{background:#F5F7FC;border-radius:20px;border-bottom-left-radius:5px;padding:18px 22px;display:flex;align-items:center;gap:6px;}
 .tdot{width:9px;height:9px;border-radius:50%;background:var(--text-light);animation:tdBounce 1.4s ease-in-out infinite;}
 .tdot:nth-child(2){animation-delay:.2s;}
 .tdot:nth-child(3){animation-delay:.4s;}
 @keyframes tdBounce{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-7px);opacity:1;}}
 
-/* event list inside bubble */
-.ev-list{margin:8px 0 6px;display:flex;flex-direction:column;gap:5px;}
-.ev-item{
-  font-size:19px;padding:8px 14px;
-  background:white;border-left:3px solid var(--blue);
-  border-radius:0 10px 10px 0;color:var(--navy-dark);
-  line-height:1.4;
-}
-.followup{margin-top:10px;font-size:17px;color:var(--text-muted);}
-
-/* direction steps inside bubble */
-.dir-steps{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
-.dir-step{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #eaeffa;}
-.dir-step:last-child{border-bottom:none;}
-.dir-step-icon{
-  width:38px;height:38px;border-radius:50%;
-  background:var(--blue-pale);border:1px solid var(--blue-border);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.dir-step-icon svg{width:20px;height:20px;}
-.dir-step-body{flex:1;}
-.dir-step-main{font-size:19px;font-weight:600;color:var(--navy-dark);}
-.dir-step-sub{font-size:15px;color:var(--text-muted);margin-top:3px;line-height:1.5;}
-
 audio.inline-audio{width:100%;height:38px;margin-top:10px;border-radius:8px;accent-color:var(--blue);}
 
 /* ── QUICK ACTIONS ── */
-.quick-row{
-  display:flex;gap:12px;margin-top:12px;width:100%;flex-shrink:0;
-}
-.qa-card{
-  flex:1;height:72px;
-  background:var(--blue-pale);
-  border:1px solid var(--blue-border);
-  border-radius:16px;padding:0 18px;
-  display:flex;align-items:center;gap:12px;
-  cursor:pointer;font-family:'Noto Sans Georgian',sans-serif;
-  font-size:16px;font-weight:700;color:var(--navy-dark);
-  transition:background 0.15s,border-color 0.15s;
-}
+.quick-row{display:flex;gap:12px;margin-top:12px;width:100%;flex-shrink:0;}
+.qa-card{flex:1;height:72px;background:var(--blue-pale);border:1px solid var(--blue-border);border-radius:16px;padding:0 18px;display:flex;align-items:center;gap:12px;cursor:pointer;font-family:'Noto Sans Georgian',sans-serif;font-size:16px;font-weight:700;color:var(--navy-dark);transition:background 0.15s,border-color 0.15s;}
 .qa-card:hover{background:#e6eeff;border-color:#b8c8ee;}
 .qa-card svg{width:26px;height:26px;flex-shrink:0;fill:none;stroke:var(--navy);stroke-width:1.8;}
 .qa-card span{text-align:left;line-height:1.3;}
 
 /* ── BOTTOM INPUT ── */
-.bottom-bar{
-  position:fixed;bottom:0;left:0;right:0;
-  background:var(--bg);padding:10px 0 14px;
-  border-top:1px solid var(--border);
-  z-index:50;
-}
-.input-inner{
-  max-width:860px;margin:0 auto;padding:0 16px;
-  display:flex;align-items:center;gap:12px;
-}
-.input-shell{
-  flex:1;height:56px;
-  background:var(--white);
-  border:1px solid #DDE5F2;border-radius:999px;
-  padding:0 20px;
-  display:flex;align-items:center;
-}
-#text-input{
-  flex:1;border:none;outline:none;background:transparent;
-  font-family:'Noto Sans Georgian',sans-serif;
-  font-size:17px;color:var(--text-main);
-}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);padding:10px 0 14px;border-top:1px solid var(--border);z-index:50;}
+.input-inner{max-width:860px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:12px;}
+.input-shell{flex:1;height:56px;background:var(--white);border:1px solid #DDE5F2;border-radius:999px;padding:0 20px;display:flex;align-items:center;}
+#text-input{flex:1;border:none;outline:none;background:transparent;font-family:'Noto Sans Georgian',sans-serif;font-size:17px;color:var(--text-main);}
 #text-input::placeholder{color:var(--text-light);}
-#text-send{
-  width:44px;height:44px;border-radius:50%;border:none;
-  background:var(--navy);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;transition:background 0.15s;
-}
+#text-send{width:44px;height:44px;border-radius:50%;border:none;background:var(--navy);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s;}
 #text-send:hover{background:var(--navy-mid);}
 #text-send svg{width:18px;height:18px;fill:white;margin-left:2px;}
 
 /* ── HOME PANEL ── */
-.overlay{
-  display:none;position:fixed;inset:0;
-  background:rgba(10,31,92,0.35);z-index:200;
-  align-items:flex-end;justify-content:center;
-}
+.overlay{display:none;position:fixed;inset:0;background:rgba(10,31,92,0.35);z-index:200;align-items:flex-end;justify-content:center;}
 .overlay.open{display:flex;}
-.panel-sheet{
-  background:var(--white);border-radius:28px 28px 0 0;
-  width:100%;max-width:860px;
-  padding:28px 28px 44px;
-  display:flex;flex-direction:column;gap:16px;
-}
+.panel-sheet{background:var(--white);border-radius:28px 28px 0 0;width:100%;max-width:860px;padding:28px 28px 44px;display:flex;flex-direction:column;gap:16px;}
 .panel-title{font-size:22px;font-weight:700;color:var(--navy-dark);}
 .panel-close{align-self:flex-end;background:none;border:none;font-size:26px;color:var(--text-light);cursor:pointer;line-height:1;margin-top:-6px;}
 .panel-sheet label{font-size:16px;color:var(--text-muted);}
-.panel-sheet input{
-  width:100%;height:56px;
-  border:1.5px solid var(--border);border-radius:14px;
-  padding:0 18px;
-  font-family:'Noto Sans Georgian',sans-serif;
-  font-size:18px;color:var(--text-main);outline:none;
-}
+.panel-sheet input{width:100%;height:56px;border:1.5px solid var(--border);border-radius:14px;padding:0 18px;font-family:'Noto Sans Georgian',sans-serif;font-size:18px;color:var(--text-main);outline:none;}
 .panel-sheet input:focus{border-color:var(--blue);}
 .panel-row{display:flex;gap:12px;}
 .psave{flex:1;height:54px;background:var(--navy);border:none;border-radius:14px;color:white;font-family:'Noto Sans Georgian',sans-serif;font-size:17px;font-weight:700;cursor:pointer;}
@@ -294,260 +126,129 @@ audio.inline-audio{width:100%;height:38px;margin-top:10px;border-radius:8px;acce
 #home-status{font-size:14px;color:#2d8a5e;min-height:20px;}
 
 /* ── HISTORY PAGE ── */
-#history-page{
-  display:none;position:fixed;inset:0;
-  background:var(--bg);z-index:300;
-  flex-direction:column;
-}
+#history-page{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column;}
 #history-page.open{display:flex;}
-
-/* History header — IDENTICAL height/padding to main header */
-.hist-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 28px;height:68px;flex-shrink:0;
-  background:var(--white);border-bottom:1px solid var(--border);
-  gap:14px;
-}
-.hist-back{
-  width:42px;height:42px;border-radius:50%;border:none;
-  background:var(--navy);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
+.hist-header{display:flex;align-items:center;justify-content:space-between;padding:12px 28px;height:68px;flex-shrink:0;background:var(--white);border-bottom:1px solid var(--border);gap:14px;}
+.hist-back{width:42px;height:42px;border-radius:50%;border:none;background:var(--navy);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .hist-back svg{width:20px;height:20px;fill:white;}
 .hist-header-text{flex:1;min-width:0;}
 .hist-header-title{font-size:20px;font-weight:700;color:var(--navy-dark);line-height:1.2;}
 .hist-header-sub{font-size:13px;color:var(--text-muted);margin-top:1px;}
-.hist-clear-btn{
-  display:flex;align-items:center;gap:8px;
-  height:42px;padding:0 16px;
-  border:1px solid #f0c0bb;border-radius:12px;
-  background:white;cursor:pointer;
-  font-family:'Noto Sans Georgian',sans-serif;
-  font-size:14px;font-weight:500;color:var(--red);white-space:nowrap;
-}
+.hist-clear-btn{display:flex;align-items:center;gap:8px;height:42px;padding:0 16px;border:1px solid #f0c0bb;border-radius:12px;background:white;cursor:pointer;font-family:'Noto Sans Georgian',sans-serif;font-size:14px;font-weight:500;color:var(--red);white-space:nowrap;}
 .hist-clear-btn svg{width:16px;height:16px;fill:none;stroke:var(--red);stroke-width:2;}
-
-/* Scrollable body */
-.hist-body{
-  flex:1;overflow-y:auto;
-  padding:16px 24px 40px;
-  max-width:820px;width:100%;margin:0 auto;
-  align-self:stretch;
-}
-
-/* Search */
+.hist-body{flex:1;overflow-y:auto;padding:16px 24px 40px;max-width:820px;width:100%;margin:0 auto;align-self:stretch;}
 .hist-search-row{margin-bottom:16px;}
-.hist-search-wrap{
-  height:48px;
-  background:var(--white);border:1px solid var(--border);border-radius:12px;
-  padding:0 16px;display:flex;align-items:center;gap:12px;
-}
+.hist-search-wrap{height:48px;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:0 16px;display:flex;align-items:center;gap:12px;}
 .hist-search-wrap svg{width:18px;height:18px;fill:none;stroke:var(--text-light);stroke-width:2;flex-shrink:0;}
 #hist-search{border:none;outline:none;background:transparent;font-family:'Noto Sans Georgian',sans-serif;font-size:16px;color:var(--text-main);flex:1;}
 #hist-search::placeholder{color:var(--text-light);}
-
-/* List */
 .hist-list{display:flex;flex-direction:column;}
-.hist-item{
-  position:relative;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;
-  gap:12px;
-}
+.hist-item{position:relative;display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;gap:12px;}
 .hist-item:last-child{border-bottom:none;}
 .hist-item:hover .hist-item-title{color:var(--blue);}
 .hist-item-left{flex:1;min-width:0;}
-.hist-item-title{font-size:17px;font-weight:600;color:var(--navy-dark);margin-bottom:4px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hist-item-title{font-size:17px;font-weight:600;color:var(--navy-dark);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .hist-item-tag{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted);}
 .tag-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .hist-item-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .hist-item-time{font-size:13px;color:var(--text-light);white-space:nowrap;}
-.hist-item-menu{
-  width:32px;height:32px;border-radius:50%;border:none;background:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;color:var(--text-light);
-  font-size:20px;line-height:1;
-}
+.hist-item-menu{width:32px;height:32px;border-radius:50%;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-light);font-size:20px;line-height:1;}
 .hist-item-menu:hover{background:var(--blue-pale);}
 .hist-empty{text-align:center;padding:48px 0;color:var(--text-muted);font-size:18px;}
-.hist-footer{
-  margin-top:20px;padding:13px 16px;
-  background:#F3F6FD;border-radius:12px;
-  display:flex;align-items:center;gap:12px;
-  font-size:14px;color:var(--text-muted);
-}
+.hist-footer{margin-top:20px;padding:13px 16px;background:#F3F6FD;border-radius:12px;display:flex;align-items:center;gap:12px;font-size:14px;color:var(--text-muted);}
 .hist-footer svg{width:18px;height:18px;fill:none;stroke:var(--text-muted);stroke-width:2;flex-shrink:0;}
+.hist-menu-dropdown{display:none;position:absolute;right:0;top:36px;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:50;min-width:130px;overflow:hidden;}
+.hist-menu-dropdown.open{display:block;}
+.hist-menu-action{width:100%;padding:11px 16px;border:none;background:none;font-family:'Noto Sans Georgian',sans-serif;font-size:14px;text-align:left;cursor:pointer;display:block;color:var(--text-main);}
+.hist-menu-action:hover{background:var(--blue-pale);}
+.hist-menu-action.danger{color:var(--red);}
+.hist-menu-action.danger:hover{background:#fff3f3;}
 
 /* ── HISTORY DETAIL ── */
-#hdetail-page{
-  display:none;position:fixed;inset:0;
-  background:var(--bg);z-index:500;
-  flex-direction:column;
-}
+#hdetail-page{display:none;position:fixed;inset:0;background:var(--bg);z-index:500;flex-direction:column;}
 #hdetail-page.open{display:flex;}
-
-/* topbar same height as main header */
-.hd-topbar{
-  display:flex;align-items:center;
-  padding:12px 28px;height:68px;flex-shrink:0;
-  background:var(--white);border-bottom:1px solid var(--border);
-  gap:14px;
-}
-.hd-back-btn{
-  width:42px;height:42px;border-radius:50%;border:none;
-  background:var(--navy);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
+.hd-topbar{display:flex;align-items:center;padding:12px 28px;height:68px;flex-shrink:0;background:var(--white);border-bottom:1px solid var(--border);gap:14px;}
+.hd-back-btn{width:42px;height:42px;border-radius:50%;border:none;background:var(--navy);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .hd-back-btn svg{width:20px;height:20px;fill:white;}
 .hd-topbar-info{flex:1;min-width:0;}
-.hd-topbar-title{font-size:16px;font-weight:700;color:var(--navy-dark);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hd-topbar-title{font-size:16px;font-weight:700;color:var(--navy-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .hd-topbar-meta{display:flex;align-items:center;gap:8px;margin-top:2px;}
 .hd-tag-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 .hd-tag-lbl{font-size:12px;color:var(--text-muted);}
 .hd-topbar-time{font-size:12px;color:var(--text-light);}
-/* three-dot in detail page */
 .hd-topbar-menu-wrap{position:relative;flex-shrink:0;}
-.hd-topbar-menu{
-  width:40px;height:40px;border-radius:50%;border:none;background:none;
-  cursor:pointer;font-size:22px;color:var(--text-light);
-  display:flex;align-items:center;justify-content:center;
-}
+.hd-topbar-menu{width:40px;height:40px;border-radius:50%;border:none;background:none;cursor:pointer;font-size:22px;color:var(--text-light);display:flex;align-items:center;justify-content:center;}
 .hd-topbar-menu:hover{background:var(--blue-pale);}
-.hd-topbar-dropdown{
-  display:none;position:absolute;right:0;top:44px;
-  background:var(--white);border:1px solid var(--border);
-  border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.12);
-  z-index:600;min-width:140px;overflow:hidden;
-}
+.hd-topbar-dropdown{display:none;position:absolute;right:0;top:44px;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:600;min-width:140px;overflow:hidden;}
 .hd-topbar-dropdown.open{display:block;}
-.hd-dropdown-action{
-  width:100%;padding:12px 16px;border:none;background:none;
-  font-family:'Noto Sans Georgian',sans-serif;font-size:14px;
-  text-align:left;cursor:pointer;display:block;color:var(--text-main);
-}
+.hd-dropdown-action{width:100%;padding:12px 16px;border:none;background:none;font-family:'Noto Sans Georgian',sans-serif;font-size:14px;text-align:left;cursor:pointer;display:block;color:var(--text-main);}
 .hd-dropdown-action:hover{background:var(--blue-pale);}
 .hd-dropdown-action.danger{color:var(--red);}
 .hd-dropdown-action.danger:hover{background:#fff3f3;}
-
-.hd-msgs-wrap{
-  flex:1;overflow-y:auto;
-  padding:16px 20px 24px;
-  display:flex;flex-direction:column;gap:14px;
-  max-width:820px;width:100%;margin:0 auto;
-}
+.hd-msgs-wrap{flex:1;overflow-y:auto;padding:16px 20px 24px;display:flex;flex-direction:column;gap:14px;max-width:820px;width:100%;margin:0 auto;}
 .hd-msgs-wrap::-webkit-scrollbar{width:4px;}
 .hd-msgs-wrap::-webkit-scrollbar-thumb{background:#d0d8ee;border-radius:4px;}
-
 .hd-row{display:flex;align-items:flex-end;gap:8px;}
 .hd-row.user{flex-direction:row-reverse;}
 .hd-av{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-bottom:2px;}
 .hd-av.bot{background:var(--navy);}
 .hd-av.user{background:#dde6ff;}
-.hd-av svg{width:14px;height:14px;}
 .hd-bwrap{display:flex;flex-direction:column;max-width:80%;gap:3px;}
 .hd-row.user .hd-bwrap{align-items:flex-end;}
 .hd-row.bot  .hd-bwrap{align-items:flex-start;}
-.hd-bub{padding:10px 14px;border-radius:14px;font-size:15px;line-height:1.55;word-break:break-word;}
+.hd-bub{padding:10px 14px;border-radius:14px;font-size:15px;line-height:1.55;word-break:break-word;white-space:pre-wrap;}
 .hd-row.bot  .hd-bub{background:#F5F7FC;border-bottom-left-radius:3px;color:var(--text-main);}
 .hd-row.user .hd-bub{background:var(--blue-light);border-bottom-right-radius:3px;color:var(--text-main);}
 .hd-time{font-size:11px;color:var(--text-light);}
-
-.hd-footer-card{
-  margin:6px 20px 0;padding:12px 16px;
-  background:var(--blue-pale);border:1px solid var(--blue-border);border-radius:12px;
-  display:flex;align-items:center;gap:12px;
-  font-size:13px;color:var(--text-muted);
-  flex-shrink:0;max-width:820px;width:calc(100% - 40px);align-self:center;
-}
+.hd-footer-card{margin:6px 20px 0;padding:12px 16px;background:var(--blue-pale);border:1px solid var(--blue-border);border-radius:12px;display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text-muted);flex-shrink:0;max-width:820px;width:calc(100% - 40px);align-self:center;}
 .hd-footer-card svg{width:20px;height:20px;fill:none;stroke:var(--blue);stroke-width:1.8;flex-shrink:0;}
 .hd-footer-label{font-size:11px;color:var(--text-light);margin-bottom:1px;}
 .hd-footer-val{font-size:14px;font-weight:600;color:var(--navy-dark);}
 
-/* Three-dot dropdown (list) */
-.hist-menu-dropdown{
-  display:none;position:absolute;right:0;top:36px;
-  background:var(--white);border:1px solid var(--border);
-  border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.12);
-  z-index:50;min-width:130px;overflow:hidden;
-}
-.hist-menu-dropdown.open{display:block;}
-.hist-menu-action{
-  width:100%;padding:11px 16px;border:none;background:none;
-  font-family:'Noto Sans Georgian',sans-serif;font-size:14px;
-  text-align:left;cursor:pointer;display:block;color:var(--text-main);
-}
-.hist-menu-action:hover{background:var(--blue-pale);}
-.hist-menu-action.danger{color:var(--red);}
-.hist-menu-action.danger:hover{background:#fff3f3;}
-
-/* offline banner */
+/* Offline banner */
 #offline{display:none;padding:10px 24px;background:#fff3f3;border-bottom:1px solid #f9c9c9;font-size:16px;color:var(--red);text-align:center;}
 #offline.show{display:block;}
 
-/* ── RESPONSIVE — mobile ── */
+/* ── RESPONSIVE ── */
 @media(max-width:640px){
-  /* ALL headers (main + history + detail) same height */
-  .header,.hist-header,.hd-topbar{
-    padding:10px 14px;height:56px;
-  }
+  .header,.hist-header,.hd-topbar{padding:10px 14px;height:56px;}
   .header-title,.hist-header-title{font-size:16px;}
   .header-sub,.hist-header-sub{font-size:11px;}
   .header-mic-icon{width:34px;height:34px;}
   .header-mic-icon svg{width:15px;height:15px;}
-  /* Icon-only header buttons on mobile */
   .hist-btn span,.home-btn span{display:none;}
   .hist-btn,.home-btn{padding:0 10px;height:36px;min-width:36px;border-radius:10px;}
   .hist-back,.hd-back-btn{width:36px;height:36px;}
   .hist-back svg,.hd-back-btn svg{width:17px;height:17px;}
   .hist-clear-btn span{display:none;}
   .hist-clear-btn{padding:0 10px;height:36px;gap:0;}
-
-  /* Page body */
   .page-body{padding:8px 8px 84px;}
   .main-card{padding:14px 12px 10px;border-radius:18px;}
-
-  /* Mic — large, matching reference image */
   .mic-section{margin-bottom:8px;}
   .mic-glow-ring{width:200px;height:200px;}
   .mic-glow-ring::before{width:200px;height:200px;}
   #big-mic-btn{width:154px;height:154px;}
   #big-mic-btn svg{width:62px;height:62px;}
   .mic-label{font-size:17px;margin-top:12px;}
-
-  /* Chat bubbles */
   .bubble{font-size:15px;padding:10px 13px;}
   .bot-av{width:34px;height:34px;}
   .user-av{width:30px;height:30px;}
-
-  /* Quick actions: side by side */
   .quick-row{flex-direction:row;gap:8px;margin-top:8px;}
   .qa-card{height:72px;font-size:13px;padding:0 12px;border-radius:12px;gap:8px;}
   .qa-card svg{width:24px;height:24px;}
-
-  /* Bottom bar */
   .bottom-bar{padding:8px 0 14px;}
   .input-inner{padding:0 12px;gap:8px;}
   .input-shell{height:52px;padding:0 16px;}
   #text-input{font-size:15px;}
-  #text-send{width:44px;height:44px;}
-  #text-send svg{width:18px;height:18px;}
-
-  /* History body padding */
   .hist-body{padding:12px 14px 32px;}
   .hist-item-title{font-size:15px;}
   .hist-item-time{font-size:12px;}
-
-  /* History detail */
   .hd-topbar-title{font-size:14px;}
   .hd-msgs-wrap{padding:12px 12px 20px;}
   .hd-footer-card{margin:4px 12px 0;width:calc(100% - 24px);}
 }
-
-/* Landscape mobile / short screens */
 @media(max-height:600px){
-  .mic-glow-ring{width:120px;height:120px;}
-  .mic-glow-ring::before{width:120px;height:120px;}
+  .mic-glow-ring,.mic-glow-ring::before{width:120px;height:120px;}
   #big-mic-btn{width:92px;height:92px;}
   #big-mic-btn svg{width:36px;height:36px;}
   .mic-label{font-size:13px;margin-top:6px;}
@@ -559,18 +260,18 @@ audio.inline-audio{width:100%;height:38px;margin-top:10px;border-radius:8px;acce
 </head>
 <body>
 
-<!-- OFFLINE -->
+<!-- Offline banner -->
 <div id="offline">⚠️ ინტერნეტი გათიშულია</div>
 
-<!-- HEADER -->
+<!-- ── HEADER ── -->
 <header class="header">
   <div class="header-left">
     <div class="header-mic-icon">
       <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 16.93A8.001 8.001 0 0 1 4 11H2a10 10 0 0 0 9 9.95V23h2v-2.05A10 10 0 0 0 22 11h-2a8.001 8.001 0 0 1-7 6.93z"/></svg>
     </div>
     <div>
-      <div class="header-title">როგორ შემიძლია დავეხმარო?</div>
-      <div class="header-sub">თქვენი ხმა – ჩვენი დახმარება</div>
+      <div class="header-title">თბილისის ასისტენტი</div>
+<!--      <div class="header-sub">თქვენი ხმა – ჩვენი დახმარება</div>-->
     </div>
   </div>
   <div class="header-right">
@@ -585,11 +286,10 @@ audio.inline-audio{width:100%;height:38px;margin-top:10px;border-radius:8px;acce
   </div>
 </header>
 
-<!-- MAIN -->
+<!-- ── MAIN ── -->
 <div class="page-body">
   <div class="main-card">
 
-    <!-- BIG MIC -->
     <div class="mic-section">
       <div class="mic-glow-ring">
         <button id="big-mic-btn" aria-label="ჩაწერის დაწყება" aria-pressed="false">
@@ -599,13 +299,11 @@ audio.inline-audio{width:100%;height:38px;margin-top:10px;border-radius:8px;acce
       <div class="mic-label" id="mic-label">დააჭირეთ და ისაუბრეთ</div>
     </div>
 
-    <!-- CONVERSATION -->
     <div class="convo-section" id="convo" role="log" aria-live="polite"></div>
 
-    <!-- QUICK ACTIONS -->
     <div class="quick-row">
       <button class="qa-card" onclick="processText('ამ კვირის ღონისძიებები')">
-        <svg viewBox="0 0 24 24"><path d="M2 6a2 2 0 0 1 2-2h2l2-2h8l2 2h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"/><circle cx="12" cy="13" r="4"/><path d="M12 10v3l2 2"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M2 6a2 2 0 0 1 2-2h2l2-2h8l2 2h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"/><circle cx="12" cy="13" r="4"/></svg>
         <span>ამ კვირის ღონისძიებები</span>
       </button>
       <button class="qa-card" onclick="gpsNearest()">
@@ -617,7 +315,7 @@ audio.inline-audio{width:100%;height:38px;margin-top:10px;border-radius:8px;acce
   </div>
 </div>
 
-<!-- BOTTOM INPUT -->
+<!-- ── BOTTOM INPUT ── -->
 <div class="bottom-bar">
   <div class="input-inner">
     <div class="input-shell">
@@ -629,7 +327,7 @@ audio.inline-audio{width:100%;height:38px;margin-top:10px;border-radius:8px;acce
   </div>
 </div>
 
-<!-- HOME OVERLAY -->
+<!-- ── HOME PANEL ── -->
 <div class="overlay" id="home-overlay">
   <div class="panel-sheet">
     <button class="panel-close" id="home-close">✕</button>
@@ -644,7 +342,7 @@ audio.inline-audio{width:100%;height:38px;margin-top:10px;border-radius:8px;acce
   </div>
 </div>
 
-<!-- HISTORY PAGE -->
+<!-- ── HISTORY PAGE ── -->
 <div id="history-page">
   <div class="hist-header">
     <button class="hist-back" id="hist-back">
@@ -656,7 +354,7 @@ audio.inline-audio{width:100%;height:38px;margin-top:10px;border-radius:8px;acce
     </div>
     <button class="hist-clear-btn" id="hist-clear">
       <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-      ყველას წაშლა
+      <span>ყველას წაშლა</span>
     </button>
   </div>
   <div class="hist-body">
@@ -669,12 +367,12 @@ audio.inline-audio{width:100%;height:38px;margin-top:10px;border-radius:8px;acce
     <div class="hist-list" id="hist-list"></div>
     <div class="hist-footer">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <span>ამ საუბარს მის სანახავად. აქ არ არის აუდიო ან ვიდეო ჩანაწერები.</span>
+      <span>შეეხეთ საუბარს მის სანახავად. აქ არ არის აუდიო ან ვიდეო ჩანაწერები.</span>
     </div>
   </div>
 </div>
 
-<!-- HISTORY DETAIL — full page -->
+<!-- ── HISTORY DETAIL ── -->
 <div id="hdetail-page">
   <div class="hd-topbar">
     <button class="hd-back-btn" id="hdetail-back">
@@ -705,586 +403,8 @@ audio.inline-audio{width:100%;height:38px;margin-top:10px;border-radius:8px;acce
   </div>
 </div>
 
-<script>
-// ═══════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════
-const API = 'https://nerissa-nonvolatilized-drew.ngrok-free.dev';
-function apiFetch(path, opts={}) {
-  return fetch(API+path,{...opts,headers:{'ngrok-skip-browser-warning':'1',...(opts.headers||{})}});
-}
+<!-- Single module entry point — all JS lives in js/ -->
+<script type="module" src="js/app.js"></script>
 
-// ═══════════════════════════════════════
-// GPS
-// ═══════════════════════════════════════
-let _gps=null;
-if(navigator.geolocation){
-  navigator.geolocation.watchPosition(
-    p=>{_gps={lat:p.coords.latitude,lng:p.coords.longitude};},
-    ()=>{},{enableHighAccuracy:false,timeout:10000,maximumAge:60000}
-  );
-}
-
-// ═══════════════════════════════════════
-// PWA
-// ═══════════════════════════════════════
-if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
-
-// ═══════════════════════════════════════
-// OFFLINE
-// ═══════════════════════════════════════
-const offEl=document.getElementById('offline');
-function chkOnline(){offEl.classList.toggle('show',!navigator.onLine);}
-window.addEventListener('online',chkOnline);window.addEventListener('offline',chkOnline);chkOnline();
-
-// ═══════════════════════════════════════
-// HOME
-// ═══════════════════════════════════════
-let savedHome=null;
-try{savedHome=JSON.parse(localStorage.getItem('tbilisi_home')||'null');}catch{}
-const homeAddrEl=document.getElementById('home-addr');
-const homeStatusEl=document.getElementById('home-status');
-if(savedHome){homeAddrEl.value=savedHome.address||'';homeStatusEl.textContent='✓ სახლი შენახულია';document.getElementById('home-btn').classList.add('saved');}
-
-document.getElementById('home-btn').addEventListener('click',()=>document.getElementById('home-overlay').classList.add('open'));
-document.getElementById('home-close').addEventListener('click',()=>document.getElementById('home-overlay').classList.remove('open'));
-
-document.getElementById('home-save').addEventListener('click',async()=>{
-  const addr=homeAddrEl.value.trim();
-  if(!addr) return;
-  // If the field still contains GPS placeholder AND we have GPS coords saved, just confirm save
-  if(savedHome && savedHome.lat && savedHome.lng && !savedHome.needsGeocode){
-    // coords already valid from GPS button — just re-confirm
-    homeStatusEl.textContent='✓ შენახულია';
-    document.getElementById('home-btn').classList.add('saved');
-    return;
-  }
-  // Otherwise geocode the typed address
-  homeStatusEl.textContent='გეოკოდირება...';
-  try{
-    const r=await apiFetch(`/geocode?address=${encodeURIComponent(addr)}`);
-    if(r.ok){
-      const d=await r.json();
-      savedHome={address:addr,lat:d.lat,lng:d.lng,needsGeocode:false};
-      localStorage.setItem('tbilisi_home',JSON.stringify(savedHome));
-      homeStatusEl.textContent='✓ შენახულია';
-      document.getElementById('home-btn').classList.add('saved');
-    } else homeStatusEl.textContent='⚠️ მისამართი ვერ მოიძებნა';
-  }catch{homeStatusEl.textContent='⚠️ კავშირის შეცდომა';}
-});
-
-document.getElementById('home-gps').addEventListener('click',()=>{
-  if(!navigator.geolocation){homeStatusEl.textContent='⚠️ GPS მიუწვდომელია';return;}
-  homeStatusEl.textContent='GPS-ის ლოდინი...';
-  navigator.geolocation.getCurrentPosition(async p=>{
-    const lat=p.coords.latitude, lng=p.coords.longitude;
-    // Try to reverse-geocode to get a real address
-    homeStatusEl.textContent='მისამართის ძიება...';
-    let displayAddr = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-    try{
-      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ka`,{headers:{'User-Agent':'TbilisiAssistant/1.0'}});
-      if(r.ok){
-        const d=await r.json();
-        const road=d.address?.road||d.address?.suburb||'';
-        const city=d.address?.city||d.address?.town||'';
-        if(road) displayAddr=road+(city?', '+city:'');
-        else if(d.display_name) displayAddr=d.display_name.split(',').slice(0,2).join(',').trim();
-      }
-    }catch{}
-    savedHome={address:displayAddr,lat,lng,needsGeocode:false};
-    localStorage.setItem('tbilisi_home',JSON.stringify(savedHome));
-    homeAddrEl.value=displayAddr;
-    homeStatusEl.textContent='✓ შენახულია';
-    document.getElementById('home-btn').classList.add('saved');
-  },()=>{homeStatusEl.textContent='⚠️ GPS შეცდომა';});
-});
-
-// ═══════════════════════════════════════
-// RECORDING
-// ═══════════════════════════════════════
-const micBtn=document.getElementById('big-mic-btn');
-const micLabel=document.getElementById('mic-label');
-let mediaRec,chunks=[],recording=false;
-
-micBtn.addEventListener('click',toggle);
-micBtn.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
-async function toggle(){recording?stopRec():await startRec();}
-
-async function startRec(){
-  try{
-    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    mediaRec=new MediaRecorder(stream,{mimeType:'audio/webm;codecs=opus'});
-    chunks=[];
-    mediaRec.ondataavailable=e=>chunks.push(e.data);
-    mediaRec.onstop=processAudio;
-    mediaRec.start();recording=true;
-    micBtn.classList.add('recording');micBtn.setAttribute('aria-pressed','true');
-    micLabel.textContent='მოუსმინეთ...';micLabel.classList.add('recording-text');
-  }catch{micLabel.textContent='მიკროფონი მიუწვდომელია';}
-}
-function stopRec(){
-  mediaRec.stop();mediaRec.stream.getTracks().forEach(t=>t.stop());
-  recording=false;micBtn.classList.remove('recording');micBtn.setAttribute('aria-pressed','false');
-  micLabel.textContent='დამუშავება...';micLabel.classList.remove('recording-text');
-}
-
-// ═══════════════════════════════════════
-// AUDIO PIPELINE
-// ═══════════════════════════════════════
-async function processAudio(){
-  const blob=new Blob(chunks,{type:'audio/webm'});
-  const form=new FormData();form.append('audio',blob,'rec.webm');
-  try{
-    micLabel.textContent='ამოიცნობს...';
-    const r=await apiFetch('/transcribe?engine=google',{method:'POST',body:form});
-    if(!r.ok)throw new Error('STT');
-    const s=await r.json();
-    const said=(s.text||'').trim();
-    if(!said){micLabel.textContent='ვერ გავიგე, სცადეთ თავიდან';setTimeout(()=>resetLabel(),2500);return;}
-    await runQuery(said);
-  }catch(e){micLabel.textContent='შეცდომა';setTimeout(()=>resetLabel(),2500);console.error(e);}
-}
-function resetLabel(){micLabel.textContent='დააჭირეთ და ისაუბრეთ';micLabel.classList.remove('recording-text');}
-
-async function processText(text){await runQuery(text);}
-
-// ═══════════════════════════════════════
-// CONVERSATION CONTEXT
-// ═══════════════════════════════════════
-let _lastVenue  = '';
-let _lastPlace  = '';
-let _lastEvent  = '';
-let _lastDate   = '';   // e.g. 'ხვალ', '26 მაი', 'ამ კვირაში'
-
-function _updateContext(userText, responseText, qData) {
-  const lower = userText.toLowerCase();
-  // Track date context
-  if (/ხვალ|tomorrow|ხვალინდელ/.test(lower))     _lastDate = 'ხვალ';
-  else if (/დღეს|today/.test(lower))              _lastDate = 'დღეს';
-  else if (/ზეგ/.test(lower))                      _lastDate = 'ზეგ';
-  else if (/ამ კვირ|this week/.test(lower))        _lastDate = 'ამ კვირაში';
-  const dm = userText.match(/(\d{1,2})\s*(იან|თებ|მარ|აპრ|მაი|ივნ|ივლ|აგვ|სექ|ოქტ|ნოე|დეკ)/);
-  if (dm) _lastDate = `${dm[1]} ${dm[2]}`;
-
-  // Track venue from response
-  const vm = responseText.match(/([ა-ჿ\s]{4,}(?:თეატრ\w*|42|სივრც\w*|მუზეუმ\w*|პარკ\w*))/i);
-  if (vm) _lastVenue = vm[1].trim();
-
-  // Track from API results
-  if (qData?.results?.length) {
-    const first = qData.results[0];
-    if (first.venue && first.venue !== 'N/A') _lastVenue = first.venue;
-    if (first.name) _lastEvent = first.name;
-  }
-  // Track place from journey response
-  const pm = responseText.match(/^([ა-ჿ\s]{3,20})(?:ში|ამდე|თან)\s+მისასვლელ/);
-  if (pm) _lastPlace = pm[1].trim();
-}
-
-// Reference words meaning "the place we just discussed"
-const _REF_WORDS = /^(მანდ|იქ|იქამდე|მანდამდე|ამ\s+ადგილ|ამ\s+თეატრ|ამ\s+სპექტაკლ|იმ\s+ადგილ|ჩავიდე\s+მანდ|წამიყვანე\s+მანდ|წამიყვანე\s+იქ|მიმიყვანე\s+მანდ|მიმიყვანე\s+იქ)/i;
-const _JOURNEY_REF = /(როგორ\s+მივი?დე?|წამიყვანე|მიმიყვანე|ჩაიყვანე|გზა\s+მანდ|მარშრუტი\s+მანდ|ავტობუს\w*\s+მანდ)/i;
-
-// Event follow-up patterns: "და სად იმართება", "სად ტარდება", "როდის არის"
-const _EVENT_FOLLOWUP = /^(და\s+)?(სად\s+(ტარდება|იმართება|არის|გაიმართება)|როდის\s+(ტარდება|არის|იმართება|გაიმართება|იქნება)|რა\s+დღეებ|სეანსები|მითხარი\s+მეტი|დეტალები|აღწერა|შესახებ)/i;
-
-function _enrichWithContext(text) {
-  const lower = text.toLowerCase();
-
-  // "from X to home"
-  const toHomePatterns = [/სახლამდე/,/სახლში\s+მივი/,/სახლში\s+მისასვლელ/,/სახლისკენ/];
-  if (toHomePatterns.some(p => p.test(lower)) && savedHome) {
-    if (/იდან|მეტრო|სადგურ|გაჩერება/.test(lower) && savedHome.address) {
-      return text.replace(/სახლამდე|სახლში\s+მივი\w*|სახლისკენ/g, savedHome.address + '-ამდე');
-    }
-  }
-
-  // Event follow-up without event name → prepend last event name
-  if (_EVENT_FOLLOWUP.test(text.trim()) && _lastEvent) {
-    return `${_lastEvent} ${text}`;
-  }
-
-  // Bare reference → inject last venue/place
-  const isBareRef = _REF_WORDS.test(text.trim());
-  const isJourneyRef = _JOURNEY_REF.test(text) && !text.includes('სახლ');
-  const hasNoPlace = !/[ა-ჿ]{5,}(?:ში|ამდე|ზე|თან)\b/.test(text);
-  if ((isBareRef || (isJourneyRef && hasNoPlace)) && (_lastVenue || _lastPlace || _lastEvent)) {
-    const ctx = _lastVenue || _lastPlace || _lastEvent;
-    return `${text} (${ctx}-ში)`;
-  }
-  return text;
-}
-
-// ═══════════════════════════════════════
-// MAIN QUERY
-// ═══════════════════════════════════════
-async function runQuery(text){
-  const enriched = _enrichWithContext(text);
-  addUserMsg(text);
-  ensureConvo(text);
-  micLabel.textContent='ეძებს...';
-  const tid=addTyping();
-
-  try{
-    const body={text: enriched};
-    if(_gps){body.lat=_gps.lat;body.lng=_gps.lng;}
-    // Send last date context so event_detail can filter by it
-    if(_lastDate) body.context_date=_lastDate;
-
-    const r=await apiFetch('/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if(!r.ok) throw new Error('query');
-    const q=await r.json();
-    removeTyping(tid);
-    resetLabel();
-
-    if(q.intent==='home_route'){await doHomeRoute();return;}
-    if(q.intent==='nearest_stop'){await gpsNearest();return;}
-
-    const display = (q.response_text||'').trim();
-    const speech  = (q.tts_text||q.response_text||'').trim();
-    addBotMsg(display);
-    saveMsg('assistant', display);
-    _updateContext(text, display, q);
-
-    await speak(speech);
-
-  }catch(e){
-    removeTyping(tid);resetLabel();
-    addBotMsg('შეცდომა. გთხოვთ სცადოთ თავიდან.');
-    console.error(e);
-  }
-}
-
-// ═══════════════════════════════════════
-// HOME ROUTE — calls backend, displays + speaks result
-// ═══════════════════════════════════════
-async function doHomeRoute(){
-  if(!savedHome){
-    addBotMsg('სახლის მისამართი არ არის შენახული. დააჭირეთ "სახლი" ღილაკს.');
-    return;
-  }
-  const tid=addTyping();
-  const go=async(clat,clng)=>{
-    try{
-      const r=await apiFetch('/home-route',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({current_lat:clat,current_lng:clng,home_lat:savedHome.lat,home_lng:savedHome.lng})
-      });
-      const d=await r.json();
-      removeTyping(tid);resetLabel();
-      if(d.needs_geocoding){
-        const m='GPS ფუნქცია ჯერ კონფიგურირებული არ არის.';
-        addBotMsg(m);saveMsg('assistant',m);await speak(m);return;
-      }
-      // backend already formats display + tts via build_response
-      const display=(d.response_text||'').trim();
-      const speech=(d.tts_text||d.response_text||'').trim();
-      addBotMsg(display);saveMsg('assistant',display);await speak(speech);
-    }catch(e){removeTyping(tid);resetLabel();addBotMsg('შეცდომა');console.error(e);}
-  };
-  if(navigator.geolocation)
-    navigator.geolocation.getCurrentPosition(
-      p=>go(p.coords.latitude,p.coords.longitude),
-      ()=>go(savedHome.lat,savedHome.lng)
-    );
-  else go(savedHome.lat,savedHome.lng);
-}
-
-// ═══════════════════════════════════════
-// GPS NEAREST — calls backend, displays + speaks result
-// ═══════════════════════════════════════
-async function gpsNearest(){
-  if(!navigator.geolocation){addBotMsg('GPS მიუწვდომელია.');return;}
-  addUserMsg('ავტობუსი ჩემს გაჩერებაზე');
-  ensureConvo('ავტობუსი ჩემს გაჩერებაზე');
-  const tid=addTyping();
-  navigator.geolocation.getCurrentPosition(async p=>{
-    try{
-      const {latitude:lat,longitude:lng}=p.coords;
-      // Use the text-formatted endpoint
-      const r=await apiFetch(`/nearest-stop-text?lat=${lat}&lng=${lng}&limit=6`);
-      const data=await r.json();
-      removeTyping(tid);resetLabel();
-      const display=(data.response_text||'ახლომდებარე გაჩერება ვერ მოიძებნა.').trim();
-      const speech=(data.tts_text||data.response_text||display).trim();
-      addBotMsg(display);saveMsg('assistant',display);await speak(speech);
-    }catch(e){removeTyping(tid);resetLabel();addBotMsg('შეცდომა');console.error(e);}
-  },()=>{removeTyping(tid);resetLabel();addBotMsg('GPS შეცდომა.');});
-}
-
-// ═══════════════════════════════════════
-// TTS — with mobile autoplay fix
-// ═══════════════════════════════════════
-let _audioUrl=null;
-async function speak(text){
-  try{
-    const r=await apiFetch('/synthesize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,language_code:'ka-GE'})});
-    if(!r.ok) return;
-    const blob=await r.blob();
-    const url=URL.createObjectURL(blob);
-    if(_audioUrl) URL.revokeObjectURL(_audioUrl);
-    _audioUrl=url;
-    const rows=convoEl.querySelectorAll('.msg-row.bot');
-    const last=rows[rows.length-1];
-    if(!last) return;
-    const old=last.querySelector('audio.inline-audio');
-    if(old){URL.revokeObjectURL(old.src);old.remove();}
-    const au=document.createElement('audio');
-    au.className='inline-audio';
-    au.controls=true;
-    au.src=url;
-    au.setAttribute('playsinline','');
-    au.setAttribute('webkit-playsinline','');
-    const bwrap=last.querySelector('.bwrap');
-    if(bwrap) bwrap.appendChild(au);
-    au.load();
-    const tryPlay = async () => {
-      try {
-        await au.play();
-      } catch(e) {
-        // Autoplay blocked — highlight the player so user knows to tap it
-        au.style.outline = '2px solid var(--blue)';
-        au.style.borderRadius = '8px';
-        setTimeout(() => { au.style.outline=''; au.style.borderRadius=''; }, 2000);
-      }
-    };
-    au.addEventListener('canplay', tryPlay, { once: true });
-    if (au.readyState >= 3) tryPlay();
-  }catch(e){console.warn('TTS:',e);}
-}
-
-// ═══════════════════════════════════════
-// CHAT DOM
-// ═══════════════════════════════════════
-const convoEl=document.getElementById('convo');
-
-function nowTime(){const d=new Date();return`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
-
-function botAvHTML(){return`<div class="bot-av"><svg viewBox="0 0 24 24" fill="white"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 16.93A8.001 8.001 0 0 1 4 11H2a10 10 0 0 0 9 9.95V23h2v-2.05A10 10 0 0 0 22 11h-2a8.001 8.001 0 0 1-7 6.93z"/></svg></div>`;}
-function userAvHTML(){return`<div class="user-av"><svg viewBox="0 0 24 24" fill="none" stroke="#032D8F" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`;}
-
-function addUserMsg(text){
-  saveMsg('user',text);
-  const row=document.createElement('div');row.className='msg-row user';
-  row.innerHTML=`${userAvHTML()}<div class="bwrap"><div class="bubble">${esc(text)}</div><div class="msg-time">${nowTime()}</div></div>`;
-  convoEl.appendChild(row);scroll();
-}
-function addBotMsg(text){
-  const row=document.createElement('div');row.className='msg-row bot';
-  const bwrap=document.createElement('div');bwrap.className='bwrap';
-  const bub=document.createElement('div');bub.className='bubble';bub.textContent=text;
-  const time=document.createElement('div');time.className='msg-time';time.textContent=nowTime();
-  bwrap.appendChild(bub);bwrap.appendChild(time);
-  row.innerHTML=botAvHTML();row.appendChild(bwrap);
-  convoEl.appendChild(row);scroll();
-}
-function addBotEl(el,histText=''){
-  const row=document.createElement('div');row.className='msg-row bot';
-  const bwrap=document.createElement('div');bwrap.className='bwrap';
-  const bub=document.createElement('div');bub.className='bubble';bub.appendChild(el);
-  const time=document.createElement('div');time.className='msg-time';time.textContent=nowTime();
-  bwrap.appendChild(bub);bwrap.appendChild(time);
-  row.innerHTML=botAvHTML();row.appendChild(bwrap);
-  convoEl.appendChild(row);scroll();
-}
-function addTyping(){
-  const id='tp-'+Date.now();
-  const row=document.createElement('div');row.className='msg-row bot';row.id=id;
-  const bwrap=document.createElement('div');bwrap.className='bwrap';
-  const tb=document.createElement('div');tb.className='typing-bubble';
-  tb.innerHTML='<span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>';
-  bwrap.appendChild(tb);
-  row.innerHTML=botAvHTML();row.appendChild(bwrap);
-  convoEl.appendChild(row);scroll();
-  return id;
-}
-function removeTyping(id){const el=document.getElementById(id);if(el)el.remove();}
-function scroll(){setTimeout(()=>{convoEl.scrollTop=convoEl.scrollHeight;},50);}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-
-// ═══════════════════════════════════════
-// CONVERSATION HISTORY
-// ═══════════════════════════════════════
-const CKEY='tbilisi_convos2';
-let _cid=null;
-function loadConvos(){try{return JSON.parse(localStorage.getItem(CKEY)||'[]');}catch{return[];}}
-function saveConvos(c){const cut=Date.now()-30*24*60*60*1000;try{localStorage.setItem(CKEY,JSON.stringify(c.filter(x=>new Date(x.startedAt).getTime()>=cut)));}catch{}}
-function ensureConvo(first){
-  if(_cid) return;
-  const cs=loadConvos();const id=Date.now().toString();_cid=id;
-  const title=first.length>70?first.slice(0,67)+'…':first;
-  cs.unshift({id,title,startedAt:new Date().toISOString(),messages:[],intent:'unknown'});
-  saveConvos(cs);
-}
-function saveMsg(role,text){
-  if(!_cid) return;
-  const cs=loadConvos();const c=cs.find(x=>x.id===_cid);if(!c)return;
-  c.messages.push({role,text,ts:new Date().toISOString()});saveConvos(cs);
-}
-
-// ═══════════════════════════════════════
-// HISTORY PAGE
-// ═══════════════════════════════════════
-const histPage=document.getElementById('history-page');
-document.getElementById('hist-open-btn').addEventListener('click',()=>{renderHist();histPage.classList.add('open');});
-document.getElementById('hist-back').addEventListener('click',()=>histPage.classList.remove('open'));
-document.getElementById('hist-clear').addEventListener('click',()=>{if(confirm('ყველა საუბარი წაიშლება?')){localStorage.removeItem(CKEY);renderHist();}});
-
-document.getElementById('hist-search').addEventListener('input',function(){
-  const q=this.value.toLowerCase();
-  document.querySelectorAll('.hist-item').forEach(el=>{
-    el.style.display=el.dataset.title.toLowerCase().includes(q)?'':'none';
-  });
-});
-
-function renderHist(){
-  const list=document.getElementById('hist-list');list.innerHTML='';
-  const cs=loadConvos();
-  if(!cs.length){list.innerHTML='<div class="hist-empty">საუბრების ისტორია ცარიელია</div>';return;}
-
-  // Close any open dropdown when clicking elsewhere
-  document.addEventListener('click', closeAllDropdowns, {once:false});
-
-  cs.forEach(c=>{
-    const d=new Date(c.startedAt);
-    const now=new Date();const yest=new Date(now);yest.setDate(yest.getDate()-1);
-    let when;
-    if(d.toDateString()===now.toDateString()) when='დღეს, '+d.toLocaleTimeString('ka-GE',{hour:'2-digit',minute:'2-digit'});
-    else if(d.toDateString()===yest.toDateString()) when='გუშინ, '+d.toLocaleTimeString('ka-GE',{hour:'2-digit',minute:'2-digit'});
-    else when=d.toLocaleDateString('ka-GE',{day:'2-digit',month:'long'})+', '+d.toLocaleTimeString('ka-GE',{hour:'2-digit',minute:'2-digit'});
-    const firstMsg=(c.messages.find(m=>m.role==='user')||{}).text||c.title;
-    const tag=guessTag(firstMsg);
-    const item=document.createElement('div');item.className='hist-item';item.dataset.title=c.title;
-
-    // Dropdown menu
-    const dropdown=document.createElement('div');dropdown.className='hist-menu-dropdown';
-    const openBtn=document.createElement('button');openBtn.className='hist-menu-action';openBtn.textContent='გახსნა';
-    const delBtn=document.createElement('button');delBtn.className='hist-menu-action danger';delBtn.textContent='წაშლა';
-    dropdown.appendChild(openBtn);dropdown.appendChild(delBtn);
-
-    item.innerHTML=`<div class="hist-item-left"><div class="hist-item-title">${esc(c.title)}</div><div class="hist-item-tag"><span class="tag-dot" style="background:${tag.color}"></span>${tag.label}</div></div><div class="hist-item-right"><div class="hist-item-time">${when}</div><button class="hist-item-menu" title="მენიუ">⋯</button></div>`;
-    item.appendChild(dropdown);
-
-    // Open detail on row click (not on menu button)
-    item.addEventListener('click',e=>{
-      if(e.target.classList.contains('hist-item-menu')) return;
-      if(e.target.classList.contains('hist-menu-action')) return;
-      if(dropdown.classList.contains('open')) return;
-      openConvDetail(c);
-    });
-
-    // Three-dot toggles dropdown
-    item.querySelector('.hist-item-menu').addEventListener('click',e=>{
-      e.stopPropagation();
-      closeAllDropdowns(null, dropdown);
-      dropdown.classList.toggle('open');
-    });
-
-    // Open action
-    openBtn.addEventListener('click',e=>{e.stopPropagation();dropdown.classList.remove('open');openConvDetail(c);});
-
-    // Delete action
-    delBtn.addEventListener('click',e=>{
-      e.stopPropagation();
-      dropdown.classList.remove('open');
-      if(confirm(`"${c.title}" — წაიშლება. დარწმუნებული ხართ?`)){
-        const updated=loadConvos().filter(x=>x.id!==c.id);
-        saveConvos(updated);
-        renderHist();
-      }
-    });
-
-    list.appendChild(item);
-  });
-}
-
-function closeAllDropdowns(e, except=null){
-  document.querySelectorAll('.hist-menu-dropdown.open').forEach(d=>{
-    if(d!==except) d.classList.remove('open');
-  });
-}
-function guessTag(text){
-  const t=(text||'').toLowerCase();
-  if(/ავტობუს|მარშრუტ|გაჩერებ|სახლ|მივიდ|წამიყვანე/.test(t)) return{label:'ტრანსპორტი',color:'#2563eb'};
-  if(/სპექტაკლ|თეატრ|ოპერ|კონცერტ|ღონისძიებ/.test(t)) return{label:'ღონისძიებები',color:'#7c3aed'};
-  return{label:'სხვა კითხვები',color:'#6C7AA0'};
-}
-
-function openConvDetail(convo){
-  _currentDetailConvoId = convo.id;
-  const tag=guessTag((convo.messages.find(m=>m.role==='user')||{}).text||convo.title);
-  document.getElementById('hd-title').textContent=convo.title;
-  document.getElementById('hd-tag-dot').style.background=tag.color;
-  document.getElementById('hd-tag-lbl').textContent=tag.label;
-  const d=new Date(convo.startedAt);
-  const now=new Date();
-  let when;
-  if(d.toDateString()===now.toDateString()) when='დღეს, '+d.toLocaleTimeString('ka-GE',{hour:'2-digit',minute:'2-digit'});
-  else when=d.toLocaleDateString('ka-GE',{day:'2-digit',month:'long'})+', '+d.toLocaleTimeString('ka-GE',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('hd-topbar-time').textContent=when;
-  const dateStr=d.toLocaleDateString('ka-GE',{day:'numeric',month:'long',year:'numeric'})+' • '+d.toLocaleTimeString('ka-GE',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('hd-footer-val').textContent=dateStr;
-
-  const msgsEl=document.getElementById('hd-msgs'); msgsEl.innerHTML='';
-  (convo.messages||[]).forEach(m=>{
-    const isUser=m.role==='user';
-    const row=document.createElement('div'); row.className=`hd-row ${isUser?'user':'bot'}`;
-    const ts=new Date(m.ts).toLocaleTimeString('ka-GE',{hour:'2-digit',minute:'2-digit'});
-    const avClass=isUser?'user':'bot';
-    const avSvg=isUser
-      ?`<svg viewBox="0 0 24 24" fill="none" stroke="#032D8F" stroke-width="2" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
-      :`<svg viewBox="0 0 24 24" fill="white" width="14" height="14"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 16.93A8.001 8.001 0 0 1 4 11H2a10 10 0 0 0 9 9.95V23h2v-2.05A10 10 0 0 0 22 11h-2a8.001 8.001 0 0 1-7 6.93z"/></svg>`;
-    row.innerHTML=`<div class="hd-av ${avClass}">${avSvg}</div><div class="hd-bwrap"><div class="hd-bub">${esc(m.text)}</div><div class="hd-time">${ts}</div></div>`;
-    msgsEl.appendChild(row);
-  });
-
-  // hide history list, show detail page
-  document.getElementById('history-page').classList.remove('open');
-  document.getElementById('hdetail-page').classList.add('open');
-  setTimeout(()=>msgsEl.scrollTop=msgsEl.scrollHeight,50);
-}
-document.getElementById('hdetail-back').addEventListener('click',()=>{
-  document.getElementById('hdetail-page').classList.remove('open');
-  renderHist();
-  document.getElementById('history-page').classList.add('open');
-});
-
-// Three-dot in detail page
-let _currentDetailConvoId = null;
-document.getElementById('hd-menu-btn').addEventListener('click', e => {
-  e.stopPropagation();
-  document.getElementById('hd-menu-dropdown').classList.toggle('open');
-});
-document.getElementById('hd-delete-btn').addEventListener('click', () => {
-  document.getElementById('hd-menu-dropdown').classList.remove('open');
-  if (!_currentDetailConvoId) return;
-  if (confirm('ეს საუბარი წაიშლება. დარწმუნებული ხართ?')) {
-    const updated = loadConvos().filter(x => x.id !== _currentDetailConvoId);
-    saveConvos(updated);
-    _currentDetailConvoId = null;
-    document.getElementById('hdetail-page').classList.remove('open');
-    renderHist();
-    document.getElementById('history-page').classList.add('open');
-  }
-});
-// Close detail dropdown when clicking elsewhere
-document.addEventListener('click', () => {
-  document.getElementById('hd-menu-dropdown').classList.remove('open');
-});
-
-// ═══════════════════════════════════════
-// TEXT INPUT
-// ═══════════════════════════════════════
-const ti=document.getElementById('text-input');
-const ts=document.getElementById('text-send');
-ts.addEventListener('click',()=>{const t=ti.value.trim();if(t){processText(t);ti.value='';}});
-ti.addEventListener('keydown',e=>{if(e.key==='Enter'){const t=ti.value.trim();if(t){processText(t);ti.value='';}}});
-
-// ═══════════════════════════════════════
-// GREETING
-// ═══════════════════════════════════════
-addBotMsg('გამარჯობა! მე ვარ თქვენი ასისტენტი.\nმითხარით, რით შემიძლია დაგეხმარო?');
-</script>
 </body>
 </html>

@@ -15,6 +15,7 @@ Return a JSON object. Possible intents:
 - "journey_search": how to GET TO a place OR from one place to another
 - "arrival_planning": user wants to know WHEN TO LEAVE to arrive at a place by a specific time
 - "home_route": wants to go home
+- "save_home_location": user wants to save current GPS as home address, OR save a named address as home
 - "unknown"
 
 JSON format:
@@ -22,11 +23,11 @@ JSON format:
   "intent": "...",
   "days": <int, default 30 for opera, 7 otherwise>,
   "route": <string or null>,
-  "place": <string, journey_search only — nominative form>,
+  "place": <string — for journey_search: destination in nominative; for save_home_location: address if specified, else null>,
   "venue": <string or null>,
   "specific_date": <"DD მაი" format or null>,
   "category": <"კონცერტი"|"თეატრი"|"ოპერა"|null>,
-  "event_name": <string or null>
+  "event_name": <string or null>,
   "arrival_time": <"HH:MM" or null — for arrival_planning only>,
   "origin": <string or null — starting point if specified>,
 }
@@ -37,14 +38,16 @@ CRITICAL RULES:
 - journey_search: ANY movement verb → "წამიყვანე","მიმიყვანე","მივიდე","წავიდე","ჩავიდე","მისასვლელი","მიმავალი","როგორ მივიდე"
 - "სახლში მიყვანე"/"სახლში მიმიყვანე"/"სახლში წამიყვანე" → home_route
 - "X-იდან სახლამდე"/"X-დან სახლში" → home_route (with origin=X)
+- "X-იდან Y-მდე" or "X-დან Y-ში" → journey_search, origin=X, place=Y
+- "სახლიდან X-მდე"/"სახლიდან X-ში" → journey_search, origin="სახლი", place=X
 - opera default days=30
-- event_detail: ANY query about a SPECIFIC named show, including:
-  * "რა დღეებში ტარდება X" → event_detail, event_name:"X"
-  * "X-ის სეანსები" → event_detail, event_name:"X"
-  * "X შემდეგი ორი კვირის განმავლობაში" → event_detail, event_name:"X"
-  * "X როდის ტარდება" → event_detail, event_name:"X"
-  * "X-ის გრაფიკი" → event_detail, event_name:"X"
-  * "X-ის აღწერა" / "X-ის შესახებ" → event_detail, event_name:"X"
+- save_home_location examples:
+  * "ჩემი ახლანდელი ლოკაცია შეინახე სახლის მისამართად" → save_home_location, place=null
+  * "ახლა სადაც ვარ, ეს ადგილი შეინახე სახლის მისამართად" → save_home_location, place=null
+  * "სახლის მისამართია ის სადაც ახლა ვარ" → save_home_location, place=null
+  * "ვარაზის ხეობის 14 შეინახე სახლის მისამართად" → save_home_location, place="ვარაზის ხეობის 14"
+  * "სახლის მისამართი ვარაზის ხეობა 14-ია" → save_home_location, place="ვარაზის ხეობა 14"
+- event_detail: ANY query about a SPECIFIC named show
 - For days: "ხვალ"→1, "დღეს"→0, "ზეგ"→2, "ამ კვირაში"→7, "ამ თვეში"→30
 
 Georgian date words (genitive case used in speech):
@@ -62,22 +65,13 @@ Examples:
 - "ხვალ რა სპექტაკლებია" → concert_search, category:"თეატრი", days:1
 - "ხვალინდელი კონცერტები" → concert_search, category:"კონცერტი", days:1
 - "დღეს რა ტარდება" → concert_search, days:0
-- "ზეგ კონცერტები" → concert_search, days:2
 - "ამ კვირის ღონისძიებები" → concert_search, days:7
-- "ექვს მაისს რა თეატრებია" → concert_search, specific_date:"06 მაი", category:"თეატრი"
-- "ოცდაათი მაისის კონცერტები" → concert_search, specific_date:"30 მაი", category:"კონცერტი"
 - "წამიყვანე ნუცუბიძის პლატოზე" → journey_search, place:"ნუცუბიძის პლატო"
 - "305 ავტობუსი" → bus_search, route:"305"
 - "სახლში წამიყვანე" → home_route
-- "რუსთაველის მეტროდან სახლამდე" → home_route, origin:"რუსთაველის მეტრო"
-- "მეტროდან სახლში მივიდე" → home_route, origin:"მეტრო"
+- "სახლიდან რუსთაველის მეტრომდე" → journey_search, origin:"სახლი", place:"რუსთაველის მეტრო"
+- "ახლა სადაც ვარ შეინახე სახლის მისამართად" → save_home_location, place:null
 - "მაკბეტი როდის ტარდება" → event_detail, event_name:"მაკბეტი"
-- "რა დღეებში ტარდება მაკბეტი" → event_detail, event_name:"მაკბეტი"
-- "რა დღეებში ტარდება მაკბეტი შემდეგი ორი კვირის განმავლობაში" → event_detail, event_name:"მაკბეტი"
-- "მაკბეტის სეანსები" → event_detail, event_name:"მაკბეტი"
-- "ურჩხული და ლამაზმანი რომელ დღეებში" → event_detail, event_name:"ურჩხული და ლამაზმანი"
-- "ბენზინგასამართი სადგური გრაფიკი" → event_detail, event_name:"ბენზინგასამართი სადგური"
-- "მითხარი რწყილი და ჭიანჭველას აღწერილობა" → event_detail, event_name:"რწყილი და ჭიანჭველა"
 - "გაბრიაძის თეატრში რა ტარდება" → concert_search, venue:"გაბრიაძის თეატრი"
 - "ახლო გაჩერება მითხარი" → nearest_stop
 - "X-იდან Y-მდე" → journey_search, place:"Y", origin:"X"
@@ -111,11 +105,11 @@ def _parse_with_gemini(text: str) -> IntentResult | None:
             return None
         raw = re.sub(r'```(?:json)?|```', '', raw).strip()
         parsed = json.loads(raw)
-        print(f'GEMINI: {parsed}', flush=True)
+        log.info('GEMINI intent: %s', parsed)
         intent = parsed.get('intent', 'unknown')
         lower_text = text.lower()
 
-        # ── Fix days for time words Gemini often gets wrong ──
+        # Fix days for time words Gemini often gets wrong
         if intent == 'concert_search':
             if any(kw in lower_text for kw in ['ხვალ', 'tomorrow', 'ხვალინდელ']):
                 parsed['days'] = 1
@@ -125,12 +119,11 @@ def _parse_with_gemini(text: str) -> IntentResult | None:
                 parsed['days'] = 2
             elif any(kw in lower_text for kw in ['ამ კვირაში', 'ამ კვირას', 'კვირაში', 'this week']):
                 parsed['days'] = 7
-            # Opera default
             if parsed.get('category') == 'ოპერა' and parsed.get('days', 7) <= 7:
-                if not any(kw in lower_text for kw in ['ხვალ','დღეს','ზეგ','ამ კვირ']):
+                if not any(kw in lower_text for kw in ['ხვალ', 'დღეს', 'ზეგ', 'ამ კვირ']):
                     parsed['days'] = 30
 
-        # ── concert_search with category as place name → redirect ──
+        # journey_search with category name as place → redirect to concert_search
         if intent == 'journey_search':
             place = (parsed.get('place') or '').lower()
             cat_map = {'თეატრი': 'თეატრი', 'ოპერა': 'ოპერა', 'კონცერტი': 'კონცერტი', 'ბალეტი': 'ოპერა'}
@@ -140,6 +133,9 @@ def _parse_with_gemini(text: str) -> IntentResult | None:
         if intent == 'nearest_stop':
             return IntentResult(intent='nearest_stop')
 
+        if intent == 'save_home_location':
+            return IntentResult(intent='save_home_location', place=parsed.get('place'))
+
         if intent == 'arrival_planning':
             return IntentResult(
                 intent='arrival_planning',
@@ -147,23 +143,20 @@ def _parse_with_gemini(text: str) -> IntentResult | None:
                 specific_date=parsed.get('arrival_time'),
             )
 
-        # ── home_route with origin ──
         if intent == 'home_route':
-            return IntentResult(
-                intent='home_route',
-                origin=parsed.get('origin'),
-            )
+            return IntentResult(intent='home_route', origin=parsed.get('origin'))
 
         return IntentResult(
             intent=intent,
-            days=parsed.get('days',
-                            30 if parsed.get('category') == 'ოპერა' else 7) if intent == 'concert_search' else None,
+            days=parsed.get('days', 30 if parsed.get('category') == 'ოპერა' else 7)
+                 if intent == 'concert_search' else None,
             route=str(parsed['route']) if parsed.get('route') else None,
             place=parsed.get('place') if intent in ('journey_search', 'arrival_planning') else None,
             origin=parsed.get('origin') if intent in ('journey_search', 'arrival_planning', 'home_route') else None,
             venue=parsed.get('venue') if intent == 'concert_search' else None,
-            specific_date=parsed.get('specific_date') if intent == 'concert_search' else parsed.get(
-                'arrival_time') if intent == 'arrival_planning' else None,
+            specific_date=(parsed.get('specific_date') if intent == 'concert_search'
+                           else parsed.get('arrival_time') if intent == 'arrival_planning'
+                           else None),
             category=parsed.get('category') if intent == 'concert_search' else None,
             event_name=parsed.get('event_name') if intent == 'event_detail' else None,
         )
@@ -175,21 +168,17 @@ def _parse_with_gemini(text: str) -> IntentResult | None:
 # ── Date extraction ───────────────────────────────────────────────────────────
 
 _ALL_NUMS = {
-    'ოცდათერთმეტ':31,'ოცდათერთმეტი':31,
-    'ოცდაათ':30,'ოცდაათი':30,
+    'ოცდათერთმეტ':31,'ოცდათერთმეტი':31,'ოცდაათ':30,'ოცდაათი':30,
     'ოცდაცხრა':29,'ოცდარვა':28,'ოცდაშვიდ':27,'ოცდაექვს':26,
     'ოცდახუთ':25,'ოცდაოთხ':24,'ოცდასამ':23,'ოცდაორ':22,'ოცდაერთ':21,
-    'ოცი':20,'ოც':20,
-    'ცხრამეტ':19,'თვრამეტ':18,'ჩვიდმეტ':17,'თექვსმეტ':16,
+    'ოცი':20,'ოც':20,'ცხრამეტ':19,'თვრამეტ':18,'ჩვიდმეტ':17,'თექვსმეტ':16,
     'თხუთმეტ':15,'თოთხმეტ':14,'ცამეტ':13,'თორმეტ':12,'თერთმეტ':11,
-    'ათი':10,'ათ':10,
-    'ცხრა':9,'რვა':8,'შვიდ':7,'შვიდი':7,
-    'ექვსი':6,'ექვს':6,'ხუთი':5,'ხუთ':5,
-    'ოთხი':4,'ოთხ':4,'სამი':3,'სამ':3,'ორი':2,'ორ':2,'ერთი':1,'ერთ':1,
+    'ათი':10,'ათ':10,'ცხრა':9,'რვა':8,'შვიდ':7,'შვიდი':7,
+    'ექვსი':6,'ექვს':6,'ხუთი':5,'ხუთ':5,'ოთხი':4,'ოთხ':4,
+    'სამი':3,'სამ':3,'ორი':2,'ორ':2,'ერთი':1,'ერთ':1,
     'მეათე':10,'მეცხრე':9,'მერვე':8,'მეშვიდე':7,'მეექვსე':6,
     'მეხუთე':5,'მეოთხე':4,'მესამე':3,'მეორე':2,'პირველ':1,
 }
-
 _GEO_MONTHS_FULL = {
     'იანვარ':1,'თებერვალ':2,'მარტ':3,'აპრილ':4,'მაის':5,'ივნის':6,
     'ივლის':7,'აგვისტ':8,'სექტემბერ':9,'ოქტომბერ':10,'ნოემბერ':11,'დეკემბერ':12,
@@ -202,7 +191,7 @@ def _extract_specific_date(text: str) -> str | None:
     lower = text.lower()
     m = re.search(
         r'(\d{1,2})\s+(იანვარ|თებერვალ|მარტ|აპრილ|მაის|ივნის|ივლის|აგვისტ|სექტემბერ|ოქტომბერ|ნოემბერ|დეკემბერ)',
-        lower
+        lower,
     )
     if m:
         day = int(m.group(1))
@@ -226,46 +215,46 @@ _THEATRE_KW = {'სპექტაკლ','წარმოდგენ','თე�
 _OPERA_KW   = {'ოპერ','ბალეტ','opera','ballet'}
 _BUS_KW     = {'ავტობუს','მარშრუტ','გაჩერებ','ტრანსპორტ','ttc','bus','route'}
 _EVENT_KW   = {'ღონისძიებ'}
-
 _JOURNEY_KW = {
     'მივიდე','მივიდეთ','მისვლა','მისასვლელ','წავიდე','ჩავიდე','ჩასვლა',
     'ჩავაღწიო','მივაღწიო','მოვხვდე','მიმავალი','გზა','მარშრუტი',
-    'მიდის','მივა','ახლოს','მდე მიდის',
-    'იდან','დან','ფაბრიკიდან',
+    'მიდის','მივა','ახლოს','მდე მიდის','იდან','დან','ფაბრიკიდან',
     'წამიყვანე','წამიყვანეთ','მიმიყვანე','მიმიყვანეთ',
     'გამიყვანე','გამიყვანეთ','წაიყვანე',
     'როგორ მივიდე','როგორ წავიდე','როგორ ჩავიდე',
     'which bus','what bus',
 }
-
 _HOME_KW = {
     'სახლში','სახლისკენ','home',
     'სახლში მიყვანე','სახლში მიმიყვანე','სახლში წამიყვანე',
     'სახლამდე მიყვანე','take me home','სახლამდე',
 }
-
-# ── EXTENDED detail triggers: descriptions + dates/schedule queries ──
+_SAVE_HOME_KW = {
+    'შეინახე სახლის მისამართად',
+    'სახლის მისამართად შეინახე',
+    'სახლის მისამართია',
+    'ახლანდელი ლოკაცია',
+    'ახლა სადაც ვარ',
+    'ეს ადგილი შეინახე',
+    'ეს მისამართი შეინახე',
+    'სახლის მისამართი ეს',
+}
 _DETAIL_TRIGGERS = {
-    # Description/info queries
     'აღწერილობ','აღწერ','შესახებ','დეტალ','ინფორმაცი',
     'სად ტარდება','რომელ საათ','იმართება','გაიმართება',
     'ბილეთი რა','რა ღირს','ვინ თამაშობ','ვინ მონაწილეობ',
-    # Date/schedule queries for specific named shows
     'რა დღეებ','რომელ დღეებ','სეანსები','სეანს',
     'ყველა სეანს','შემდეგი კვირ','ორი კვირ','სამი კვირ',
     'თვის განმავლობ','კვირის განმავლობ','სრული გრაფიკ',
     'გრაფიკი','განრიგი','გრაფიკ',
-    # "when is X" patterns
     'როდის არის','როდის ტარდება','როდის იქნება','როდის გაიმართება',
 }
-
 _DAY_MAP = {
     'დღეს':0,'ახლა':0,'ხვალ':1,'ხვალინდელ':1,'ზეგ':2,
     'ამ კვირაში':7,'ამ კვირას':7,'კვირაში':7,'კვირის':7,
     'ამ თვეში':30,'თვეში':30,'შემდეგი თვის':30,'ერთი თვის':30,
     'today':0,'tomorrow':1,'this week':7,'this month':30,
 }
-
 _NOISE = {
     'მივიდე','მივიდეთ','ჩავიდე','წავიდე','გადავიდე','წამიყვანე','მიმიყვანე',
     'გამიყვანე','როგორ','რომელი','სად','რა','მითხარი','შეგიძლია',
@@ -322,13 +311,11 @@ def _extract_place(text: str) -> str:
 
 
 def _extract_event_name(text: str) -> str:
-    """Extract event name, removing query scaffolding words."""
     remove = [
         'მითხარი','შეგიძლია','მაინტერესებს','გთხოვ',
         'აღწერილობა','შესახებ','დეტალები','ინფორმაცია',
         'სად ტარდება','რომელ საათზე','სად არის','რა არის',
         'დეტალი','მოყევი','გვიამბე',
-        # Date query words to strip
         'რა დღეებში ტარდება','რა დღეებში','რომელ დღეებში',
         'სეანსები','ყველა სეანსი','სრული გრაფიკი','განრიგი',
         'შემდეგი ორი კვირის განმავლობაში','შემდეგი კვირის განმავლობაში',
@@ -356,13 +343,18 @@ def _extract_event_name(text: str) -> str:
 def _rule_based_parse(text: str) -> IntentResult:
     lower = text.lower()
 
-    # Home route — check before journey
-    # Also handles "from X to home"
+    # Save home location
+    if any(kw in lower for kw in _SAVE_HOME_KW):
+        # Check if a specific address is mentioned
+        place = None
+        addr_m = re.search(r'(?:მისამართად\s+)?([ა-ჿ\s\d]+(?:ქუჩა|გამზირი|შ\.|გ\.|პლ\.)[^\s,]+)', text, re.IGNORECASE)
+        return IntentResult(intent='save_home_location', place=place)
+
+    # Home route — before journey
     home_dest_patterns = ['სახლამდე','სახლში მივი','სახლისკენ','take me home']
     if _has(lower, _HOME_KW) or any(p in lower for p in home_dest_patterns):
         if any(kw in lower for kw in ['მიყვანე','მიმიყვანე','წამიყვანე','წასვლა','მისვლა','მივიდე',
                                        'სახლამდე','სახლისკენ','take me home']):
-            # Extract origin if present (e.g. "მეტროდან სახლამდე")
             origin = None
             origin_m = re.search(r'([\u10D0-\u10FF]{3,})იდან', text)
             if origin_m:
@@ -373,8 +365,7 @@ def _rule_based_parse(text: str) -> IntentResult:
         if 'სახლში' in lower and not _has(lower, _CONCERT_KW | _THEATRE_KW | _OPERA_KW):
             return IntentResult(intent='home_route')
 
-    # Event detail — check before concert_search
-    # Matches both description queries AND date/schedule queries for named events
+    # Event detail
     if _has(lower, _DETAIL_TRIGGERS):
         event_name = _extract_event_name(text)
         if event_name and len(event_name) > 2:
@@ -382,7 +373,7 @@ def _rule_based_parse(text: str) -> IntentResult:
 
     # Nearest stop
     _NEAREST_KW = {'ახლო გაჩერება','ახლომდებარე','ახლოს ავტობუს','nearest bus',
-                   'ახლო ავტობუს','უახლოეს გაჩერება'}
+                   'ახლო ავტობუს','უახლოეს გაჩერება','ყველაზე ახლო გაჩერება'}
     if any(kw in lower for kw in _NEAREST_KW):
         return IntentResult(intent='nearest_stop')
 
@@ -394,83 +385,49 @@ def _rule_based_parse(text: str) -> IntentResult:
         arrival_time = None
         if t_match:
             h = int(t_match.group(1))
-            m = int(t_match.group(2)) if t_match.lastindex >= 2 and ':' in t_match.group(0) else 0
-            arrival_time = f'{h:02d}:{m:02d}'
+            m_val = int(t_match.group(2)) if t_match.lastindex >= 2 and ':' in t_match.group(0) else 0
+            arrival_time = f'{h:02d}:{m_val:02d}'
         return IntentResult(intent='arrival_planning', place=place, specific_date=arrival_time)
 
-    # Journey — any movement verb
+    # Journey
     if _has(lower, _JOURNEY_KW):
         place = _extract_place(text)
-        # Extract origin if present
         origin = None
         origin_m = re.search(r'([\u10D0-\u10FF]{3,})იდან', text)
         if origin_m:
             w = origin_m.group(1)
             if w not in {'სახლ','ჩემ','იქ','აქ','მათ','ამ'}:
                 origin = w
+        # "სახლიდან X" → journey with origin="სახლი"
+        if 'სახლიდან' in lower or 'სახლიდან' in lower:
+            origin = 'სახლი'
         return IntentResult(intent='journey_search', place=place, origin=origin)
 
-    # Specific date extraction
     specific_date = _extract_specific_date(text)
-
-    # Bus route — only with transport keywords
     route = _extract_route(text)
     if route and not specific_date:
         return IntentResult(intent='bus_search', route=route)
     if _has(lower, _BUS_KW) and not specific_date and not _has(lower, _OPERA_KW | _THEATRE_KW | _CONCERT_KW):
         return IntentResult(intent='bus_search', route=None)
 
-    # Opera
     if _has(lower, _OPERA_KW):
-        return IntentResult(
-            intent='concert_search',
-            days=30,
-            specific_date=specific_date,
-            category='ოპერა',
-        )
-
-    # Theatre
+        return IntentResult(intent='concert_search', days=30, specific_date=specific_date, category='ოპერა')
     if _has(lower, _THEATRE_KW):
         days = 30 if specific_date else _extract_days(lower)
-        return IntentResult(
-            intent='concert_search',
-            days=days,
-            specific_date=specific_date,
-            category='თეატრი',
-        )
-
-    # Concert
+        return IntentResult(intent='concert_search', days=days, specific_date=specific_date, category='თეატრი')
     if _has(lower, _CONCERT_KW):
         days = 30 if specific_date else _extract_days(lower)
-        return IntentResult(
-            intent='concert_search',
-            days=days,
-            specific_date=specific_date,
-            category='კონცერტი',
-        )
-
-    # All events or date query
+        return IntentResult(intent='concert_search', days=days, specific_date=specific_date, category='კონცერტი')
     if _has(lower, _EVENT_KW) or specific_date:
         days = 30 if specific_date else _extract_days(lower)
-        return IntentResult(
-            intent='concert_search',
-            days=days,
-            specific_date=specific_date,
-            category=None,
-        )
+        return IntentResult(intent='concert_search', days=days, specific_date=specific_date, category=None)
 
-    # Venue-only query
     venue_m = re.search(r'([ა-ჿ\s]+(?:თეატრ\w*|42))\s*(?:ში|ზე|ად)', text, re.IGNORECASE)
     if venue_m:
-        venue_raw = venue_m.group(1).strip()
+        venue_raw  = venue_m.group(1).strip()
         venue_clean = re.sub(r'(ში|ზე|ად|ით)$', '', venue_raw).strip()
         if len(venue_clean) > 4 and 'თეატრ' in venue_clean.lower():
-            return IntentResult(
-                intent='concert_search',
-                days=30,
-                category=None,
-                venue=venue_clean,
-            )
+            return IntentResult(intent='concert_search', days=30, category=None, venue=venue_clean)
 
     return IntentResult(intent='unknown')
 
@@ -478,12 +435,13 @@ def _rule_based_parse(text: str) -> IntentResult:
 def parse_intent(text: str) -> IntentResult:
     lower = text.lower()
     # Fast rule-based pre-checks
-    if any(kw in lower for kw in {'ახლო გაჩერება','ახლომდებარე','უახლოეს გაჩერება','nearest'}):
+    if any(kw in lower for kw in {'ახლო გაჩერება','ახლომდებარე','უახლოეს გაჩერება','nearest',
+                                    'ყველაზე ახლო გაჩერება'}):
         return IntentResult(intent='nearest_stop')
     if any(kw in lower for kw in {'სახლში წამიყვანე','სახლში მიმიყვანე','სახლში მიყვანე'}):
         return IntentResult(intent='home_route')
-    if any(kw in lower for kw in {'ახლო გაჩერებიდან','უახლოეს გაჩერებიდან','ახლო გაჩერებაზე'}):
-        return IntentResult(intent='nearest_stop')
+    if any(kw in lower for kw in _SAVE_HOME_KW):
+        return IntentResult(intent='save_home_location')
 
     result = _parse_with_gemini(text)
     if result:
